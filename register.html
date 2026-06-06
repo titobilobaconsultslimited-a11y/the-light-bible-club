@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Register your child for The Light Bible Club — a fun, safe, and faith-building community for children." />
+  <title>Register — The Light Bible Club</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-icon">☀️</div>
+        The Light Bible Club
+      </a>
+      <button class="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="stories.html">Bible Stories</a></li>
+        <li><a href="activities.html">Activities</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="register.html" class="btn-nav">Join Us ✨</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO -->
+  <section class="page-hero star-bg">
+    <div class="hero-shapes"><span></span><span></span></div>
+    <div class="container">
+      <h1>Join <span>The Light Bible Club</span> 🌟</h1>
+      <p>Fill in the form below to register your child. It's completely free and takes just 2 minutes!</p>
+    </div>
+  </section>
+
+  <!-- REGISTRATION -->
+  <section class="section section-alt">
+    <div class="container">
+
+      <!-- Benefits row -->
+      <div class="features-grid" style="margin-bottom:48px;">
+        <div class="feature-card">
+          <div class="feature-icon">✅</div>
+          <h3>100% Free</h3>
+          <p>No fees, no charges — every child is welcome at no cost.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3>Safe & Secure</h3>
+          <p>Your child's information is kept private and safe with us.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📅</div>
+          <h3>Every Saturday</h3>
+          <p>Join us weekly for Bible lessons, worship, games and more!</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏅</div>
+          <h3>Earn Badges</h3>
+          <p>Children earn fun badges and certificates as they grow in faith.</p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="form-wrapper">
+        <h2 style="font-family:'Fredoka',cursive; font-size:1.6rem; margin-bottom:6px; text-align:center; color:var(--text);">Child Registration Form</h2>
+        <p style="text-align:center; color:var(--text-muted); margin-bottom:28px; font-size:0.93rem;">Fields marked with <span style="color:var(--danger);">*</span> are required.</p>
+
+        <form id="registrationForm" novalidate>
+
+          <!-- Child's details -->
+          <div class="form-section-title blue first">👦 Child's Details</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="childFirstName">First Name <span>*</span></label>
+              <input type="text" id="childFirstName" name="childFirstName" class="form-control" placeholder="e.g. Favour" required autocomplete="given-name" />
+            </div>
+            <div class="form-group">
+              <label for="childLastName">Last Name <span>*</span></label>
+              <input type="text" id="childLastName" name="childLastName" class="form-control" placeholder="e.g. Okafor" required autocomplete="family-name" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="childAge">Age <span>*</span></label>
+              <select id="childAge" name="childAge" class="form-control" required>
+                <option value="">Select age…</option>
+                <option>4</option><option>5</option><option>6</option><option>7</option>
+                <option>8</option><option>9</option><option>10</option><option>11</option>
+                <option>12</option><option>13</option><option>14</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="childGender">Gender <span>*</span></label>
+              <select id="childGender" name="childGender" class="form-control" required>
+                <option value="">Select…</option>
+                <option>Boy</option>
+                <option>Girl</option>
+                <option>Prefer not to say</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="schoolGrade">School Grade <span>*</span></label>
+            <select id="schoolGrade" name="schoolGrade" class="form-control" required>
+              <option value="">Select grade…</option>
+              <option>Pre-School / Nursery</option>
+              <option>Grade 1 (Primary 1)</option>
+              <option>Grade 2 (Primary 2)</option>
+              <option>Grade 3 (Primary 3)</option>
+              <option>Grade 4 (Primary 4)</option>
+              <option>Grade 5 (Primary 5)</option>
+              <option>Grade 6 (Primary 6)</option>
+              <option>Grade 7 (JSS 1)</option>
+              <option>Grade 8 (JSS 2)</option>
+              <option>Grade 9 (JSS 3)</option>
+            </select>
+          </div>
+
+          <!-- Parent/Guardian details -->
+          <div class="form-section-title gold">👨‍👩‍👧 Parent / Guardian Details</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="parentName">Parent / Guardian Name <span>*</span></label>
+              <input type="text" id="parentName" name="parentName" class="form-control" placeholder="Full name" required autocomplete="name" />
+            </div>
+            <div class="form-group">
+              <label for="parentRelation">Relationship to Child <span>*</span></label>
+              <select id="parentRelation" name="parentRelation" class="form-control" required>
+                <option value="">Select…</option>
+                <option>Mother</option>
+                <option>Father</option>
+                <option>Guardian</option>
+                <option>Grandparent</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="parentEmail">Email Address <span>*</span></label>
+              <input type="email" id="parentEmail" name="parentEmail" class="form-control" placeholder="your@email.com" required autocomplete="email" />
+            </div>
+            <div class="form-group">
+              <label for="parentPhone">Phone Number <span>*</span></label>
+              <input type="tel" id="parentPhone" name="parentPhone" class="form-control" placeholder="+234 xxx xxxx xxx" required autocomplete="tel" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="country">Country <span>*</span></label>
+            <select id="country" name="country" class="form-control" required>
+              <option value="">Select country…</option>
+              <option>Nigeria</option>
+              <option>Ghana</option>
+              <option>Kenya</option>
+              <option>South Africa</option>
+              <option>United Kingdom</option>
+              <option>United States</option>
+              <option>Canada</option>
+              <option>Australia</option>
+              <option>Jamaica</option>
+              <option>Trinidad and Tobago</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <!-- Additional info -->
+          <div class="form-section-title green">📋 Additional Information</div>
+
+          <div class="form-group">
+            <label for="howHeard">How did you hear about us?</label>
+            <select id="howHeard" name="howHeard" class="form-control">
+              <option value="">Select…</option>
+              <option>Friend or family</option>
+              <option>Church announcement</option>
+              <option>Social media</option>
+              <option>Flyer / poster</option>
+              <option>Website</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="medicalNotes">Medical or special needs notes (optional)</label>
+            <textarea id="medicalNotes" name="medicalNotes" class="form-control" placeholder="e.g. allergies, hearing impairment, or any special needs our teachers should know about…"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-check">
+              <input type="checkbox" id="consent" name="consent" required />
+              I give my consent for my child to participate in club activities, and I confirm that the information provided is accurate. <span>*</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%; font-size:1.05rem; padding:16px; justify-content:center;">
+            Register My Child 🌟
+          </button>
+        </form>
+
+        <!-- Success Message -->
+        <div id="formSuccess" class="form-success">
+          <div class="success-icon">🎉</div>
+          <h3>Registration Successful!</h3>
+          <p>Welcome to The Light Bible Club! We are so excited to meet your child. We will be in touch with session details very soon. God bless your family! 🙏</p>
+          <br>
+          <a href="index.html" class="btn btn-green">Back to Home →</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- VERSE -->
+  <section class="verse-banner">
+    <blockquote>"Jesus said, 'Let the little children come to me, and do not hinder them, for the kingdom of heaven belongs to such as these.'"</blockquote>
+    <cite>— Matthew 19:14</cite>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo" style="color:#FFD740;">
+            <div class="logo-icon" style="background:#FFD74033;">☀️</div>
+            The Light Bible Club
+          </div>
+          <p>A safe, loving, and fun community where children grow in God's Word and shine His light in the world.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="stories.html">Bible Stories</a></li>
+            <li><a href="activities.html">Activities</a></li>
+            <li><a href="register.html">Join the Club</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Get in Touch</h4>
+          <ul>
+            <li><a href="mailto:hello@thelightbibleclub.org">✉️ hello@thelightbibleclub.org</a></li>
+            <li><a href="#">📍 Meets every Saturday</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 The Light Bible Club. All rights reserved.</span>
+        <span>Made with ❤️ for God's little ones.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

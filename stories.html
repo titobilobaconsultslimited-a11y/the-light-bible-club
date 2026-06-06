@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Bible Stories for children — The Light Bible Club. Explore amazing stories of faith, courage, and God's love." />
+  <title>Bible Stories — The Light Bible Club</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>" />
+  <style>
+    .story-full-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      transition: transform 0.25s;
+    }
+    .story-full-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+    .story-full-thumb {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4.5rem;
+      min-height: 160px;
+    }
+    .sft-1 { background: linear-gradient(135deg,#FFF5CC,#FFE18A); }
+    .sft-2 { background: linear-gradient(135deg,#D6EEFF,#A8D8F0); }
+    .sft-3 { background: linear-gradient(135deg,#D8F5D8,#A8E4A8); }
+    .sft-4 { background: linear-gradient(135deg,#F5E0FF,#DDA8F0); }
+    .sft-5 { background: linear-gradient(135deg,#FFE8CC,#FFB877); }
+    .sft-6 { background: linear-gradient(135deg,#FFD6D6,#FF9898); }
+    .sft-7 { background: linear-gradient(135deg,#CCF0F5,#88D8E4); }
+    .sft-8 { background: linear-gradient(135deg,#FFFACC,#FFE455); }
+    .sft-9 { background: linear-gradient(135deg,#E0FFE0,#7AE87A); }
+    .story-full-body { padding: 24px; }
+    .story-full-body .ref {
+      display: inline-block;
+      background: var(--sky);
+      color: var(--blue);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 50px;
+      margin-bottom: 10px;
+    }
+    .story-full-body h3 { font-family:'Fredoka One',cursive; font-size:1.3rem; margin-bottom:8px; }
+    .story-full-body p  { font-size:0.95rem; color:var(--gray); line-height:1.7; margin-bottom:14px; }
+    .story-full-body .verse {
+      background: var(--light-gray);
+      border-left: 4px solid var(--orange);
+      padding: 10px 14px;
+      font-style: italic;
+      font-size: 0.88rem;
+      color: var(--dark);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 14px;
+    }
+    .stories-list { display: flex; flex-direction: column; gap: 20px; }
+
+    .category-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .tab-btn {
+      padding: 8px 20px;
+      border-radius: 50px;
+      border: 2px solid var(--orange);
+      background: transparent;
+      color: var(--orange);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--orange);
+      color: var(--white);
+    }
+
+    @media (max-width: 600px) {
+      .story-full-card { grid-template-columns: 1fr; }
+      .story-full-thumb { min-height: 100px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="logo-icon">☀️</div>
+        The Light Bible Club
+      </a>
+      <button class="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="stories.html">Bible Stories</a></li>
+        <li><a href="activities.html">Activities</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="register.html" class="btn-nav">Join Us ✨</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO -->
+  <section class="page-hero star-bg">
+    <div class="hero-shapes"><span></span><span></span></div>
+    <div class="container">
+      <h1>Bible Stories 📖</h1>
+      <p>Amazing, true stories of faith, miracles, and God's incredible love for His people — told just for kids!</p>
+    </div>
+  </section>
+
+  <!-- STORIES -->
+  <section class="section">
+    <div class="container">
+      <div class="text-center">
+        <div class="category-tabs">
+          <button class="tab-btn active">All Stories</button>
+          <button class="tab-btn">Old Testament</button>
+          <button class="tab-btn">New Testament</button>
+          <button class="tab-btn">Heroes of Faith</button>
+        </div>
+      </div>
+
+      <div class="stories-list">
+
+        <!-- Story 1 -->
+        <div class="story-full-card">
+          <div class="story-full-thumb sft-1">🌈</div>
+          <div class="story-full-body">
+            <span class="ref">Genesis 6–9 · Old Testament</span>
+            <h3>Noah and the Ark 🚢</h3>
+            <p>God saw that the world was full of wickedness, but Noah was a righteous man who walked faithfully with God. God told Noah to build a huge ark and fill it with animals — two of every kind! It rained for 40 days and 40 nights. When the waters dried up, God placed a beautiful rainbow in the sky as His promise never to flood the whole earth again.</p>
+            <div class="verse">"I have set my rainbow in the clouds, and it will be the sign of the covenant between me and the earth." — Genesis 9:13</div>
+            <strong style="font-size:0.9rem; color:var(--orange);">Lesson:</strong> <span style="font-size:0.9rem; color:var(--gray);">Obey God even when it seems strange to others. God rewards faithfulness!</span>
+          </div>
+        </div>
+
+        <!-- Story 2 -->
+        <div class="story-full-card">
+          <div class="story-full-thumb sft-2">🗿</div>
+          <div class="story-full-body">
+            <span class="ref">1 Samuel 17 · Old Testament</span>
+            <h3>David and Goliath ⚔️</h3>
+            <p>A giant named Goliath terrified the entire Israelite army. He was over 9 feet tall! But young David, a shepherd boy, was not afraid. He trusted in God and ran toward Goliath with a sling and five smooth stones. With one stone, the giant fell. David's courage came not from his own strength but from his deep faith in God Almighty.</p>
+            <div class="verse">"The Lord who rescued me from the paw of the lion and the paw of the bear will rescue me from the hand of this Philistine." — 1 Samuel 17:37</div>
+            <strong style="font-size:0.9rem; color:var(--orange);">Lesson:</strong> <span style="font-size:0.9rem; color:var(--gray);">No challenge is too big when God is on your side. Be brave and trust Him!</span>
+          </div>
+        </div>
+
+        <!-- Story 3 -->
+        <div class="story-full-card">
+          <div class="story-full-thumb sft-3">🦁</div>
+          <div class="story-full-body">
+            <span class="ref">Daniel 6 · Old Testament</span>
+            <h3>Daniel in the Lion's Den 🙏</h3>
+            <p>Daniel was a faithful man who prayed to God three times a day. When jealous officials convinced the king to make praying to anyone but the king illegal, Daniel still prayed. He was thrown into a den of hungry lions! But God sent an angel to shut the lions' mouths. Daniel came out without a scratch, and the king praised God because of his miracle.</p>
+            <div class="verse">"My God sent his angel, and he shut the mouths of the lions. They have not hurt me, because I was found innocent in his sight." — Daniel 6:22</div>
+            <strong style="font-size:0.9rem; color:var(--orange);">Lesson:</strong> <span style="font-size:0.9rem; color:var(--gray);">Never stop praying, no matter what. God protects those who trust in Him.</span>
+          </div>
+        </div>
+
+        <!-- Story 4 -->
+        <div class="story-full-card">
+          <div class="story-full-thumb sft-4">🐟</div>
+          <div class="story-full-body">
+            <span class="ref">Jonah 1–4 · Old Testament</span>
+            <h3>Jonah and the Big Fish 🌊</h3>
+            <p>God told Jonah to go to the city of Nineveh and warn the people about their sin. But Jonah ran away on a ship instead! A massive storm came, and Jonah was thrown overboard. A giant fish swallowed him! Inside the fish for three days, Jonah prayed and repented. The fish spat him out, and Jonah finally went to Nineveh — and the whole city turned to God!</p>
+            <div class="verse">"When my life was ebbing away, I remembered you, Lord, and my prayer rose to you." — Jonah 2:7</div>
+            <strong style="font-size:0.9rem; color:var(--orange);">Lesson:</strong> <span style="font-size:0.9rem; color:var(--gray);">You can't hide from God! When we repent and obey, He gives us a second chance.</span>
+          </div>
+        </div>
+
+        <!-- Story 5 -->
+        <div class="story-full-card">
+          <div class="story-full-thumb sft-5">🍞</div>
+          <div class="story-full-body">
+            <span class="ref">John 6:1–14 · New Testament</span>
+            <h3>Jesus Feeds 5,000 People 🐟</h3>
+            <p>A huge crowd of over 5,000 people followed Jesus to hear Him teach. They were very hungry but had no food. A young boy offered his small lunch — five loaves of bread and two fish. Jesus took the food, gave thanks to God, and began breaking it. Amazingly, it never ran out! Everyone ate until they were full, and there were 12 baskets of leftovers!</p>
+            <div class="verse">"Here is a boy with five small barley loaves and two small fish, but how far will they go among so many?" — John 6:9</div>
+            <strong style="font-size:0.9rem; color:var(--orange);">Lesson:</strong> <span style="font-size:0.9rem; color:var(--gray);">When we give what little we have to Jesus, He can do the impossible with it!</span>
+          </div>
+        </div>
+
+        <!-- Story 6 -->
+        <div class="story-full-card">
+          <div class="story-full-thumb sft-6">💛</div>
+          <div class="story-full-body">
+            <span class="ref">Luke 15:11–32 · New Testament</span>
+            <h3>The Prodigal Son 🏠</h3>
+            <p>A young son asked his father for his inheritance early and wasted it all on wild living. He ended up feeding pigs and eating their food! He came to his senses and returned home, ready to be a servant. But his father saw him from afar, ran to him, and threw a huge party to celebrate his return. This is a picture of how God welcomes us back when we turn to Him.</p>
+            <div class="verse">"For this son of mine was dead and is alive again; he was lost and is found." — Luke 15:24</div>
+            <strong style="font-size:0.9rem; color:var(--orange);">Lesson:</strong> <span style="font-size:0.9rem; color:var(--gray);">God's love never gives up on us. No matter what, we can always return to Him.</span>
+          </div>
+        </div>
+
+        <!-- Story 7 -->
+        <div class="story-full-card">
+          <div class="story-full-thumb sft-7">🌊</div>
+          <div class="story-full-body">
+            <span class="ref">Exodus 14 · Old Testament</span>
+            <h3>Moses and the Red Sea 🪄</h3>
+            <p>God's people, the Israelites, were trapped between Pharaoh's army and the Red Sea. There was nowhere to run! Moses stretched out his hand, and God parted the sea — creating a dry path right through the middle! All the people walked across safely. When Pharaoh's army followed, the water crashed back and they were defeated. God had rescued His people again!</p>
+            <div class="verse">"The Lord will fight for you; you need only to be still." — Exodus 14:14</div>
+            <strong style="font-size:0.9rem; color:var(--orange);">Lesson:</strong> <span style="font-size:0.9rem; color:var(--gray);">When we face impossible situations, God makes a way where there seems to be no way!</span>
+          </div>
+        </div>
+
+        <!-- Story 8 -->
+        <div class="story-full-card">
+          <div class="story-full-thumb sft-8">⭐</div>
+          <div class="story-full-body">
+            <span class="ref">Luke 2:1–20 · New Testament</span>
+            <h3>The Birth of Jesus 🎄</h3>
+            <p>God's greatest gift to the world — Jesus! Mary and Joseph travelled to Bethlehem, and because there was no room at the inn, Jesus was born in a humble stable. Angels appeared to shepherds in the fields, saying, "Do not be afraid — the Saviour has been born!" The shepherds ran to find Jesus lying in a manger. Wise men followed a star from the East to worship Him too.</p>
+            <div class="verse">"Today in the town of David a Savior has been born to you; he is the Messiah, the Lord." — Luke 2:11</div>
+            <strong style="font-size:0.9rem; color:var(--orange);">Lesson:</strong> <span style="font-size:0.9rem; color:var(--gray);">God loves us so much He sent His Son Jesus to save the world!</span>
+          </div>
+        </div>
+
+        <!-- Story 9 -->
+        <div class="story-full-card">
+          <div class="story-full-thumb sft-9">🙌</div>
+          <div class="story-full-body">
+            <span class="ref">Acts 16:16–34 · New Testament</span>
+            <h3>Paul and Silas in Prison 🎵</h3>
+            <p>Paul and Silas were thrown into prison for preaching the gospel. Their feet were locked in stocks. But instead of crying or giving up, they sang praises to God at midnight! Suddenly a great earthquake shook the prison, all the doors flew open, and everyone's chains fell off! The amazed jailer and his whole family became believers that very night.</p>
+            <div class="verse">"About midnight Paul and Silas were praying and singing hymns to God, and the other prisoners were listening to them." — Acts 16:25</div>
+            <strong style="font-size:0.9rem; color:var(--orange);">Lesson:</strong> <span style="font-size:0.9rem; color:var(--gray);">Praise God even in hard times — your worship can break chains and change everything!</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- VERSE BANNER -->
+  <section class="verse-banner" style="background:linear-gradient(135deg,#5DBB63,#86D98C);">
+    <blockquote>"All Scripture is God-breathed and is useful for teaching, rebuking, correcting and training in righteousness."</blockquote>
+    <cite>— 2 Timothy 3:16</cite>
+    <br>
+    <a href="activities.html" class="btn btn-primary" style="margin-top:20px;">Try the Bible Quiz →</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo" style="color:#FFD740;">
+            <div class="logo-icon" style="background:#FFD74033;">☀️</div>
+            The Light Bible Club
+          </div>
+          <p>A safe, loving, and fun community where children grow in God's Word and shine His light in the world.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="stories.html">Bible Stories</a></li>
+            <li><a href="activities.html">Activities</a></li>
+            <li><a href="register.html">Join the Club</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Get in Touch</h4>
+          <ul>
+            <li><a href="mailto:hello@thelightbibleclub.org">✉️ hello@thelightbibleclub.org</a></li>
+            <li><a href="#">📍 Meets every Saturday</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 The Light Bible Club. All rights reserved.</span>
+        <span>Made with ❤️ for God's little ones.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
