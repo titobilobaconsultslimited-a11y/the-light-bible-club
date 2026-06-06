@@ -61,9 +61,12 @@ document.querySelectorAll('.faq-question').forEach(btn => {
 });
 
 /* --------- Registration Form --------- */
+// 🔧 REPLACE THIS URL with your deployed Google Apps Script Web App URL
+const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+
 const regForm = document.getElementById('registrationForm');
 if (regForm) {
-  regForm.addEventListener('submit', e => {
+  regForm.addEventListener('submit', async e => {
     e.preventDefault();
 
     // Basic validation
@@ -72,10 +75,10 @@ if (regForm) {
     required.forEach(field => {
       if (field.type === 'checkbox') {
         if (!field.checked) {
-          field.style.outlineColor = '#EF4444';
+          field.closest('.form-group, label').style.outline = '2px solid #EF4444';
           valid = false;
         } else {
-          field.style.outlineColor = '';
+          field.closest('.form-group, label').style.outline = '';
         }
       } else if (!field.value.trim()) {
         field.style.borderColor = '#EF4444';
@@ -86,18 +89,52 @@ if (regForm) {
     });
 
     if (!valid) {
-      // Scroll to first invalid field
-      const firstInvalid = regForm.querySelector('[required]:invalid, [required][style*="EF4444"]');
-      if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const firstBad = regForm.querySelector('[style*="EF4444"]');
+      if (firstBad) firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    // Show success message
-    regForm.style.display = 'none';
-    document.getElementById('formSuccess').style.display = 'block';
+    // Gather form data
+    const data = {
+      childFirstName: regForm.childFirstName.value.trim(),
+      childLastName:  regForm.childLastName.value.trim(),
+      childAge:       regForm.childAge.value,
+      childGender:    regForm.childGender.value,
+      schoolGrade:    regForm.schoolGrade.value,
+      parentName:     regForm.parentName.value.trim(),
+      parentRelation: regForm.parentRelation.value,
+      parentEmail:    regForm.parentEmail.value.trim(),
+      parentPhone:    regForm.parentPhone.value.trim(),
+      country:        regForm.country.value,
+      howHeard:       regForm.howHeard.value,
+      medicalNotes:   regForm.medicalNotes.value.trim()
+    };
 
-    // Scroll to success
-    document.getElementById('formSuccess').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Show loading state
+    const submitBtn = regForm.querySelector('[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Submitting…';
+    submitBtn.disabled = true;
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Apps Script requires no-cors
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      // no-cors means we can't read the response — assume success if no error thrown
+      regForm.style.display = 'none';
+      document.getElementById('formSuccess').style.display = 'block';
+      document.getElementById('formSuccess').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    } catch (err) {
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+      alert('Something went wrong. Please try again or contact us directly.');
+      console.error('Form submission error:', err);
+    }
   });
 }
 
