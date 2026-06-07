@@ -62,7 +62,7 @@ document.querySelectorAll('.faq-question').forEach(btn => {
 
 /* --------- Registration Form --------- */
 // 🔧 REPLACE THIS URL with your deployed Google Apps Script Web App URL
-const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFqCLe3DW20ce47VzqeNdzHcidByUvUF0TrhxVmKXCGvnr0_jHC06DqXPFmWVlsFBx/exec';
 
 const regForm = document.getElementById('registrationForm');
 if (regForm) {
@@ -119,12 +119,12 @@ if (regForm) {
     try {
       await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        mode: 'no-cors', // Apps Script requires no-cors
-        headers: { 'Content-Type': 'application/json' },
+        // Send as text/plain to avoid CORS preflight issues with Google Apps Script
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(data)
       });
 
-      // no-cors means we can't read the response — assume success if no error thrown
+      // Show success message
       regForm.style.display = 'none';
       document.getElementById('formSuccess').style.display = 'block';
       document.getElementById('formSuccess').scrollIntoView({ behavior: 'smooth', block: 'center' });
