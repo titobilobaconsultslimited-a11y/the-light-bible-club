@@ -20,6 +20,43 @@ function doPost(e) {
     // Determine action
     const action = data.action;
     
+    if (action === "importRegistrations") {
+      let sheet = ss.getSheetByName(SHEET_REGISTRATIONS);
+      if (!sheet) {
+        sheet = ss.insertSheet(SHEET_REGISTRATIONS);
+        sheet.appendRow([
+          "Timestamp", "Child First Name", "Child Last Name", "Age", "Gender", 
+          "Date of Birth", "School Grade", "Parent Name", "Relationship", "Parent Email", 
+          "Parent Mobile Line", "Parent WhatsApp Line", "Personal Paid Mentorship", "Country", 
+          "How Heard", "Medical Notes"
+        ]);
+      }
+      
+      const records = data.records;
+      records.forEach(item => {
+        sheet.appendRow([
+          item.timestamp || new Date().toLocaleString(),
+          item.childFirstName  || "",
+          item.childLastName   || "",
+          item.childAge        || "",
+          item.childGender     || "",
+          item.childDOB        || "",
+          item.schoolGrade     || "",
+          item.parentName      || "",
+          item.parentRelation  || "",
+          item.parentEmail     || "",
+          item.parentMobile    || "",
+          item.parentWhatsApp  || "",
+          item.mentorship      || "",
+          item.country         || "",
+          item.howHeard        || "",
+          item.medicalNotes    || ""
+        ]);
+      });
+      
+      return ContentService.createTextOutput(JSON.stringify({ result: "success", count: records.length })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
     if (action === "markAttendance") {
       let sheet = ss.getSheetByName(SHEET_ATTENDANCE);
       if (!sheet) {
