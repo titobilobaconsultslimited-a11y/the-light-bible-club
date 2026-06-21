@@ -141,7 +141,7 @@ if (regForm) {
 /* --------- Contact Form --------- */
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
-  contactForm.addEventListener('submit', e => {
+  contactForm.addEventListener('submit', async e => {
     e.preventDefault();
 
     const required = contactForm.querySelectorAll('[required]');
@@ -157,9 +157,39 @@ if (contactForm) {
 
     if (!valid) return;
 
-    contactForm.style.display = 'none';
-    document.getElementById('contactSuccess').style.display = 'block';
-    document.getElementById('contactSuccess').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Gather contact data
+    const data = {
+      contactName:    contactForm.contactName.value.trim(),
+      contactEmail:   contactForm.contactEmail.value.trim(),
+      contactSubject: contactForm.contactSubject.value,
+      contactMessage: contactForm.contactMessage.value.trim()
+    };
+
+    // Show loading state
+    const submitBtn = contactForm.querySelector('[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Sending…';
+    submitBtn.disabled = true;
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        // Send as text/plain to avoid CORS preflight issues with Google Apps Script
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data)
+      });
+
+      // Show success message
+      contactForm.style.display = 'none';
+      document.getElementById('contactSuccess').style.display = 'block';
+      document.getElementById('contactSuccess').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    } catch (err) {
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+      alert('Something went wrong. Please try again or contact us directly.');
+      console.error('Contact form submission error:', err);
+    }
   });
 }
 
