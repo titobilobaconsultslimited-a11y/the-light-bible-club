@@ -100,11 +100,14 @@ if (regForm) {
       childLastName:  regForm.childLastName.value.trim(),
       childAge:       regForm.childAge.value,
       childGender:    regForm.childGender.value,
+      childDOB:       regForm.childDOB.value,
       schoolGrade:    regForm.schoolGrade.value,
       parentName:     regForm.parentName.value.trim(),
       parentRelation: regForm.parentRelation.value,
       parentEmail:    regForm.parentEmail.value.trim(),
-      parentPhone:    regForm.parentPhone.value.trim(),
+      parentMobile:   regForm.parentMobile.value.trim(),
+      parentWhatsApp: regForm.parentWhatsApp.value.trim(),
+      mentorship:     regForm.mentorship.value,
       country:        regForm.country.value,
       howHeard:       regForm.howHeard.value,
       medicalNotes:   regForm.medicalNotes.value.trim()
@@ -341,3 +344,86 @@ renderQuiz();
 // expose globally
 window.selectAnswer = selectAnswer;
 window.restartQuiz  = restartQuiz;
+
+/* --------- Birthday Banner Overlay --------- */
+async function initBirthdayBanner() {
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=todayBirthdays`);
+    const celebrants = await res.json();
+    if (Array.isArray(celebrants) && celebrants.length > 0) {
+      // Create the banner element
+      const banner = document.createElement('div');
+      banner.id = 'birthdayBanner';
+      banner.style.cssText = `
+        position: fixed;
+        top: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-200px);
+        width: 90%;
+        max-width: 500px;
+        background: linear-gradient(135deg, #FF6B6B, #FFD93D);
+        color: #fff;
+        padding: 20px 24px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        font-family: 'Fredoka', cursive, sans-serif;
+      `;
+      
+      const names = celebrants.join(' & ');
+      banner.innerHTML = `
+        <div style="font-size: 2.8rem; line-height: 1;">🎂</div>
+        <div style="flex: 1;">
+          <h4 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 700; color: #fff;">Happy Birthday, ${names}! 🎉</h4>
+          <p style="margin: 0; font-size: 0.88rem; opacity: 0.95;">Wishing our wonderful Bible Club member${celebrants.length > 1 ? 's' : ''} a blessed day filled with joy! 🌟</p>
+        </div>
+        <button id="closeBirthdayBanner" style="
+          background: rgba(255,255,255,0.25);
+          border: none;
+          color: #fff;
+          font-size: 1rem;
+          font-weight: bold;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.2s;
+        ">✕</button>
+      `;
+      
+      document.body.appendChild(banner);
+      
+      // Animate in
+      setTimeout(() => {
+        banner.style.transform = 'translateX(-50%) translateY(0)';
+      }, 500);
+      
+      // Close action
+      document.getElementById('closeBirthdayBanner').addEventListener('click', () => {
+        banner.style.transform = 'translateX(-50%) translateY(-200px)';
+        setTimeout(() => banner.remove(), 600);
+      });
+      
+      // Auto remove after 15 seconds
+      setTimeout(() => {
+        if (document.body.contains(banner)) {
+          banner.style.transform = 'translateX(-50%) translateY(-200px)';
+          setTimeout(() => banner.remove(), 600);
+        }
+      }, 15000);
+    }
+  } catch (err) {
+    console.error('Failed to load birthday celebrants:', err);
+  }
+}
+
+if (typeof APPS_SCRIPT_URL !== 'undefined' && APPS_SCRIPT_URL) {
+  window.addEventListener('load', initBirthdayBanner);
+}

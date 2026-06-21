@@ -110,21 +110,27 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="schoolGrade">School Grade <span>*</span></label>
-            <select id="schoolGrade" name="schoolGrade" class="form-control" required>
-              <option value="">Select grade…</option>
-              <option>Pre-School / Nursery</option>
-              <option>Grade 1 (Primary 1)</option>
-              <option>Grade 2 (Primary 2)</option>
-              <option>Grade 3 (Primary 3)</option>
-              <option>Grade 4 (Primary 4)</option>
-              <option>Grade 5 (Primary 5)</option>
-              <option>Grade 6 (Primary 6)</option>
-              <option>Grade 7 (JSS 1)</option>
-              <option>Grade 8 (JSS 2)</option>
-              <option>Grade 9 (JSS 3)</option>
-            </select>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="childDOB">Date of Birth <span>*</span></label>
+              <input type="date" id="childDOB" name="childDOB" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label for="schoolGrade">School Grade <span>*</span></label>
+              <select id="schoolGrade" name="schoolGrade" class="form-control" required>
+                <option value="">Select grade…</option>
+                <option>Pre-School / Nursery</option>
+                <option>Grade 1 (Primary 1)</option>
+                <option>Grade 2 (Primary 2)</option>
+                <option>Grade 3 (Primary 3)</option>
+                <option>Grade 4 (Primary 4)</option>
+                <option>Grade 5 (Primary 5)</option>
+                <option>Grade 6 (Primary 6)</option>
+                <option>Grade 7 (JSS 1)</option>
+                <option>Grade 8 (JSS 2)</option>
+                <option>Grade 9 (JSS 3)</option>
+              </select>
+            </div>
           </div>
 
           <!-- Parent/Guardian details -->
@@ -154,27 +160,33 @@
               <input type="email" id="parentEmail" name="parentEmail" class="form-control" placeholder="your@email.com" required autocomplete="email" />
             </div>
             <div class="form-group">
-              <label for="parentPhone">Phone Number <span>*</span></label>
-              <input type="tel" id="parentPhone" name="parentPhone" class="form-control" placeholder="+234 xxx xxxx xxx" required autocomplete="tel" />
+              <label for="parentMobile">Mobile Line (Calls) <span>*</span></label>
+              <input type="tel" id="parentMobile" name="parentMobile" class="form-control" placeholder="+234 xxx xxxx xxx" required autocomplete="tel" />
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="country">Country <span>*</span></label>
-            <select id="country" name="country" class="form-control" required>
-              <option value="">Select country…</option>
-              <option>Nigeria</option>
-              <option>Ghana</option>
-              <option>Kenya</option>
-              <option>South Africa</option>
-              <option>United Kingdom</option>
-              <option>United States</option>
-              <option>Canada</option>
-              <option>Australia</option>
-              <option>Jamaica</option>
-              <option>Trinidad and Tobago</option>
-              <option>Other</option>
-            </select>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="parentWhatsApp">WhatsApp Line <span>*</span></label>
+              <input type="tel" id="parentWhatsApp" name="parentWhatsApp" class="form-control" placeholder="+234 xxx xxxx xxx" required />
+            </div>
+            <div class="form-group">
+              <label for="country">Country <span>*</span></label>
+              <select id="country" name="country" class="form-control" required>
+                <option value="">Select country…</option>
+                <option>Nigeria</option>
+                <option>Ghana</option>
+                <option>Kenya</option>
+                <option>South Africa</option>
+                <option>United Kingdom</option>
+                <option>United States</option>
+                <option>Canada</option>
+                <option>Australia</option>
+                <option>Jamaica</option>
+                <option>Trinidad and Tobago</option>
+                <option>Other</option>
+              </select>
+            </div>
           </div>
 
           <!-- Additional info -->
@@ -190,6 +202,15 @@
               <option>Flyer / poster</option>
               <option>Website</option>
               <option>Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="mentorship">Do you need personal paid mentorship for your child? <span>*</span></label>
+            <select id="mentorship" name="mentorship" class="form-control" required>
+              <option value="">Select option…</option>
+              <option value="Yes">Yes, I am interested</option>
+              <option value="No">No, thank you</option>
             </select>
           </div>
 
