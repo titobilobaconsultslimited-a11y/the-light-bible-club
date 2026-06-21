@@ -517,6 +517,85 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    /* --- WhatsApp Custom Message Modal Styles --- */
+    .whatsapp-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .whatsapp-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .whatsapp-modal-content {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+      transform: translateY(20px);
+      transition: transform 0.25s ease;
+    }
+
+    .whatsapp-modal.active .whatsapp-modal-content {
+      transform: translateY(0);
+    }
+
+    .whatsapp-modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .whatsapp-modal-header h3 {
+      font-size: 1.25rem;
+      color: var(--secondary);
+      margin: 0;
+    }
+
+    .close-modal-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .close-modal-btn:hover {
+      background: #F1F5F9;
+      color: var(--text-dark);
+    }
+
+    .whatsapp-modal-body {
+      padding: 24px;
+    }
+
+    .whatsapp-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      background: #F8FAFC;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
   </style>
 </head>
 <body>
@@ -775,6 +854,45 @@
     </div>
 
   </main>
+
+  <!-- WhatsApp Custom Message Modal -->
+  <div id="whatsappModal" class="whatsapp-modal">
+    <div class="whatsapp-modal-content">
+      <div class="whatsapp-modal-header">
+        <h3>💬 Send WhatsApp Message</h3>
+        <button onclick="closeWhatsAppModal()" class="close-modal-btn">&times;</button>
+      </div>
+      <div class="whatsapp-modal-body">
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label style="font-weight: 500; font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Child:</label>
+          <span id="waModalChildName" style="font-weight: 600; color: var(--secondary); font-size: 1.05rem;"></span>
+        </div>
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label style="font-weight: 500; font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px;">WhatsApp Number:</label>
+          <span id="waModalNumber" style="font-weight: 600; color: #27AE60; font-size: 1.05rem;"></span>
+        </div>
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label for="waTemplateSelect" style="font-weight: 500; font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">Choose Message Template:</label>
+          <select id="waTemplateSelect" class="form-control" onchange="applyWATemplate()">
+            <option value="checkup">Custom Check-up Message</option>
+            <option value="attendance_present">Attendance Confirmation (Present)</option>
+            <option value="attendance_absent">Absent Check-up (Absent)</option>
+            <option value="assignment_done">Assignment Completed (Done)</option>
+            <option value="assignment_not_done">Assignment Reminder (Not Done)</option>
+            <option value="birthday">Birthday Greeting</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="waMessageText" style="font-weight: 500; font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 6px;">Message Text:</label>
+          <textarea id="waMessageText" class="form-control" rows="6" style="resize: vertical; font-family: inherit; font-size: 0.9rem; line-height: 1.4; padding: 12px; width: 100%; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box;"></textarea>
+        </div>
+      </div>
+      <div class="whatsapp-modal-footer">
+        <button onclick="closeWhatsAppModal()" class="btn" style="background-color: var(--border); color: var(--text-dark);">Cancel</button>
+        <button id="sendWAModalBtn" class="btn btn-primary" style="background-color: #27AE60; border-color: #27AE60;">Send on WhatsApp</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Script Logic -->
   <script>
@@ -1198,7 +1316,7 @@
           <td><strong>${child.parentName}</strong><br><span style="font-size:0.78rem; color:var(--text-muted);">${child.parentRelation || child.relationship}</span></td>
           <td>
             <div style="font-size:0.85rem;">📞 ${child.parentMobileLine || child.parentMobile || 'N/A'}</div>
-            <div style="font-size:0.85rem; color:#27AE60;">💬 ${child.parentWhatsAppLine || child.parentWhatsApp || 'N/A'}</div>
+            <div style="font-size:0.85rem; color:#27AE60; cursor:pointer;" onclick="sendWhatsAppReminder(${child.id}, 'checkup')">💬 <u>${child.parentWhatsAppLine || child.parentWhatsApp || 'N/A'}</u></div>
           </td>
           <td>
             <span style="padding: 4px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; background: ${child.personalPaidMentorship === 'Yes' ? 'rgba(255, 140, 0, 0.1)' : 'rgba(100,116,139,0.1)'}; color: ${child.personalPaidMentorship === 'Yes' ? 'var(--primary)' : 'var(--text-muted)'};">
@@ -1302,41 +1420,92 @@
       }
     }
 
+    // Global active modal data
+    let activeWAMember = null;
+
+    function applyWATemplate() {
+      if (!activeWAMember) return;
+      const select = document.getElementById('waTemplateSelect');
+      const textarea = document.getElementById('waMessageText');
+      const parentName = activeWAMember.parentName;
+      const childName = activeWAMember.childFirstName;
+      
+      const templates = {
+        checkup: `Hi ${parentName}, just checking in on ${childName}! We hope they are doing great this week. Let us know if you have any prayer requests or updates. Blessings! ☀️`,
+        attendance_present: `Hi ${parentName}, thank you so much for bringing ${childName} to The Light Bible Club today! We had a wonderful time learning God's Word together. God bless you! ☀️`,
+        attendance_absent: `Hi ${parentName}, we missed ${childName} at The Light Bible Club today! We hope everything is fine. Here is a quick memory verse to encourage them: "The Lord is my shepherd; I shall not want." We look forward to seeing them next Saturday! 🙏`,
+        assignment_done: `Hi ${parentName}, fantastic job to ${childName} for submitting their Bible club assignment! We are so proud of their diligence and growth in God's Word. Keep shining! 🌟`,
+        assignment_not_done: `Hi ${parentName}, this is a gentle reminder from The Light Bible Club about ${childName}'s weekly assignment. Completing it helps reinforce the lesson! Let us know if you need any help with it. Blessings! 📖`,
+        birthday: `Hi ${parentName}, wishing ${childName} a very Happy Birthday today! May they grow in wisdom, stature, and favor with God and man. We celebrate them! 🎂🎉`
+      };
+      
+      textarea.value = templates[select.value] || '';
+    }
+
+    function closeWhatsAppModal() {
+      document.getElementById('whatsappModal').classList.remove('active');
+    }
+
+    // Phone formatting helper
+    function cleanWhatsAppPhone(phone) {
+      if (!phone) return '';
+      let clean = phone.replace(/\D/g, ''); // Remove non-digits
+      
+      if (clean.length === 10 && (clean.startsWith('8') || clean.startsWith('7') || clean.startsWith('9'))) {
+        // e.g. 8023200821 -> prepend 234
+        clean = '234' + clean;
+      } else if (clean.length === 11 && clean.startsWith('0')) {
+        // e.g. 08023200821 -> replace leading 0 with 234
+        clean = '234' + clean.slice(1);
+      }
+      
+      return clean;
+    }
+
     // Send WhatsApp messages
     function sendWhatsAppReminder(childId, type, status) {
       const child = store.registrations.find(r => r.id === childId);
       if (!child) return;
 
-      const parentName = child.parentName;
-      const childName = child.childFirstName;
-      const whatsapp = child.parentWhatsAppLine || child.parentWhatsApp;
-
-      if (!whatsapp) {
+      const rawPhone = child.parentWhatsAppLine || child.parentWhatsApp;
+      if (!rawPhone) {
         alert('WhatsApp phone number is missing for this contact.');
         return;
       }
 
-      let message = '';
-
+      const formattedPhone = cleanWhatsAppPhone(rawPhone);
+      
+      activeWAMember = child;
+      
+      // Update UI labels in modal
+      document.getElementById('waModalChildName').textContent = `${child.childFirstName} ${child.childLastName}`;
+      document.getElementById('waModalNumber').textContent = `${rawPhone} (Formatted: +${formattedPhone})`;
+      
+      // Auto-select template based on click origin
+      const select = document.getElementById('waTemplateSelect');
       if (type === 'attendance') {
-        if (status === 'Present') {
-          message = `Hi ${parentName}, thank you so much for bringing ${childName} to The Light Bible Club today! We had a wonderful time learning God's Word together. God bless you! ☀️`;
-        } else {
-          message = `Hi ${parentName}, we missed ${childName} at The Light Bible Club today! We hope everything is fine. Here is a quick memory verse to encourage them: "The Lord is my shepherd; I shall not want." We look forward to seeing them next Saturday! 🙏`;
-        }
+        select.value = status === 'Present' ? 'attendance_present' : 'attendance_absent';
       } else if (type === 'assignment') {
-        if (status === 'Done') {
-          message = `Hi ${parentName}, fantastic job to ${childName} for submitting their Bible club assignment! We are so proud of their diligence and growth in God's Word. Keep shining! 🌟`;
-        } else {
-          message = `Hi ${parentName}, this is a gentle reminder from The Light Bible Club about ${childName}'s weekly assignment. Completing it helps reinforce the lesson! Let us know if you need any help with it. Blessings! 📖`;
-        }
+        select.value = status === 'Done' ? 'assignment_done' : 'assignment_not_done';
       } else if (type === 'birthday') {
-        message = `Hi ${parentName}, wishing ${childName} a very Happy Birthday today! May they grow in wisdom, stature, and favor with God and man. We celebrate them! 🎂🎉`;
+        select.value = 'birthday';
+      } else {
+        select.value = 'checkup';
       }
-
-      const cleanPhone = whatsapp.replace(/\D/g, '');
-      const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-      window.open(url, '_blank');
+      
+      applyWATemplate();
+      
+      // Bind send button handler
+      const sendBtn = document.getElementById('sendWAModalBtn');
+      sendBtn.onclick = () => {
+        const text = document.getElementById('waMessageText').value;
+        const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+        closeWhatsAppModal();
+      };
+      
+      // Show modal
+      document.getElementById('whatsappModal').classList.add('active');
     }
 
     // Run auth check on load
