@@ -62,7 +62,7 @@ document.querySelectorAll('.faq-question').forEach(btn => {
 
 /* --------- Registration Form --------- */
 // 🔧 REPLACE THIS URL with your deployed Google Apps Script Web App URL
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaQOrm8PWZr1-v6R5i8yYyO9_GFY3BsNRgB_hjpypTFdRpIsXdsnDcka5-AeSESZre/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFjl00dnSEShtwUg_vLUR4JsZRN1edrvX1J36dRFO4i9kwYOiTchrf69b3R3psTXb_/exec';
 
 const regForm = document.getElementById('registrationForm');
 if (regForm) {

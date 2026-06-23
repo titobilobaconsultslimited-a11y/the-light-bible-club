@@ -596,6 +596,18 @@
       justify-content: flex-end;
       gap: 12px;
     }
+
+    .modal-grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .modal-grid-2col {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -792,6 +804,7 @@
     <div id="membersScreen" class="tab-screen">
       <div class="filter-bar">
         <input type="text" id="memberSearch" class="form-control search-input" placeholder="🔍 Search by name or email…">
+        <button class="btn btn-primary" style="width: auto; gap: 8px;" onclick="openAddModal()">➕ Add Child</button>
       </div>
       <div class="table-container">
         <table>
@@ -803,6 +816,7 @@
               <th>Mobile / WhatsApp</th>
               <th>Mentorship</th>
               <th>Country</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="membersTableBody">
@@ -894,10 +908,121 @@
     </div>
   </div>
 
+  <!-- Add/Edit Child Modal -->
+  <div id="childModal" class="whatsapp-modal">
+    <div class="whatsapp-modal-content" style="max-width: 700px;">
+      <div class="whatsapp-modal-header">
+        <h3 id="childModalTitle">👥 Add Registered Child</h3>
+        <button onclick="closeChildModal()" class="close-modal-btn">&times;</button>
+      </div>
+      <form id="childForm">
+        <input type="hidden" id="childFormId">
+        <div class="whatsapp-modal-body" style="max-height: 70vh; overflow-y: auto;">
+          <div class="modal-grid-2col">
+            
+            <div class="form-group">
+              <label for="cFirstName">Child First Name*</label>
+              <input type="text" id="cFirstName" required class="form-control" placeholder="e.g. John">
+            </div>
+            
+            <div class="form-group">
+              <label for="cLastName">Child Last Name*</label>
+              <input type="text" id="cLastName" required class="form-control" placeholder="e.g. Doe">
+            </div>
+            
+            <div class="form-group">
+              <label for="cDOB">Date of Birth*</label>
+              <input type="date" id="cDOB" required class="form-control" onchange="calculateAgeFromDOB()">
+            </div>
+            
+            <div class="form-group">
+              <label for="cAge">Age*</label>
+              <input type="number" id="cAge" required class="form-control" placeholder="Computed from DOB" min="0" max="30">
+            </div>
+            
+            <div class="form-group">
+              <label for="cGender">Gender*</label>
+              <select id="cGender" required class="form-control">
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="cSchoolGrade">School Grade*</label>
+              <input type="text" id="cSchoolGrade" required class="form-control" placeholder="e.g. Grade 3">
+            </div>
+            
+            <div class="form-group">
+              <label for="cParentName">Parent Name*</label>
+              <input type="text" id="cParentName" required class="form-control" placeholder="e.g. Sarah Doe">
+            </div>
+            
+            <div class="form-group">
+              <label for="cRelationship">Relationship*</label>
+              <select id="cRelationship" required class="form-control">
+                <option value="">Select Relationship</option>
+                <option value="Mother">Mother</option>
+                <option value="Father">Father</option>
+                <option value="Guardian">Guardian</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="cParentEmail">Parent Email*</label>
+              <input type="email" id="cParentEmail" required class="form-control" placeholder="e.g. parent@example.com">
+            </div>
+            
+            <div class="form-group">
+              <label for="cParentMobile">Parent Mobile Line*</label>
+              <input type="tel" id="cParentMobile" required class="form-control" placeholder="e.g. +2348012345678">
+            </div>
+            
+            <div class="form-group">
+              <label for="cParentWhatsApp">Parent WhatsApp Line*</label>
+              <input type="tel" id="cParentWhatsApp" required class="form-control" placeholder="e.g. +2348012345678">
+            </div>
+            
+            <div class="form-group">
+              <label for="cMentorship">Paid Mentorship?*</label>
+              <select id="cMentorship" required class="form-control">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="cCountry">Country*</label>
+              <input type="text" id="cCountry" required class="form-control" placeholder="e.g. Nigeria">
+            </div>
+            
+            <div class="form-group">
+              <label for="cHowHeard">How Heard</label>
+              <input type="text" id="cHowHeard" class="form-control" placeholder="e.g. Social Media">
+            </div>
+            
+          </div>
+          
+          <div class="form-group" style="margin-top: 16px; margin-bottom: 0;">
+            <label for="cMedicalNotes">Medical / Special Notes</label>
+            <textarea id="cMedicalNotes" class="form-control" rows="3" placeholder="e.g. Allergies, conditions..."></textarea>
+          </div>
+        </div>
+        <div class="whatsapp-modal-footer">
+          <button type="button" onclick="closeChildModal()" class="btn" style="background-color: var(--border); color: var(--text-dark); width: auto;">Cancel</button>
+          <button type="submit" id="saveChildBtn" class="btn btn-primary" style="width: auto;">Save Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Script Logic -->
   <script>
     // Config
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaQOrm8PWZr1-v6R5i8yYyO9_GFY3BsNRgB_hjpypTFdRpIsXdsnDcka5-AeSESZre/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFjl00dnSEShtwUg_vLUR4JsZRN1edrvX1J36dRFO4i9kwYOiTchrf69b3R3psTXb_/exec';
     
     // Auth & App state
     let loggedIn = false;
@@ -1298,7 +1423,7 @@
       }
 
       if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No records found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No records found.</td></tr>`;
         return;
       }
 
@@ -1324,6 +1449,12 @@
             </span>
           </td>
           <td>${child.country}</td>
+          <td>
+            <div class="action-group">
+              <button class="action-btn" style="color: var(--secondary); border-color: rgba(27, 54, 93, 0.4);" onclick="openEditModal(${child.id})">✏️ Edit</button>
+              <button class="action-btn" style="color: var(--red); border-color: rgba(231, 76, 60, 0.4);" onclick="deleteRegistrationPrompt(${child.id}, '${child.childFirstName.replace(/'/g, "\\'")} ${child.childLastName.replace(/'/g, "\\'")}')">🗑️ Delete</button>
+            </div>
+          </td>
         `;
         tbody.appendChild(tr);
       });
@@ -1506,6 +1637,156 @@
       
       // Show modal
       document.getElementById('whatsappModal').classList.add('active');
+    }
+
+    // Age calculator from DOB
+    function calculateAgeFromDOB() {
+      const dobVal = document.getElementById('cDOB').value;
+      if (!dobVal) return;
+      const dob = new Date(dobVal);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const monthDiff = today.getMonth() - dob.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+      document.getElementById('cAge').value = age >= 0 ? age : 0;
+    }
+
+    // Modal control
+    function openAddModal() {
+      document.getElementById('childModalTitle').textContent = '➕ Add Registered Child';
+      document.getElementById('childFormId').value = '';
+      document.getElementById('childForm').reset();
+      document.getElementById('childModal').classList.add('active');
+    }
+
+    function openEditModal(childId) {
+      const child = store.registrations.find(r => r.id === childId);
+      if (!child) return;
+
+      document.getElementById('childModalTitle').textContent = '✏️ Edit Registered Child';
+      document.getElementById('childFormId').value = child.id;
+      
+      document.getElementById('cFirstName').value = child.childFirstName || '';
+      document.getElementById('cLastName').value = child.childLastName || '';
+      
+      let dobVal = '';
+      if (child.dateOfBirth) {
+        const d = new Date(child.dateOfBirth);
+        if (!isNaN(d.getTime())) {
+          dobVal = d.toISOString().split('T')[0];
+        }
+      }
+      document.getElementById('cDOB').value = dobVal;
+      document.getElementById('cAge').value = child.age || '';
+      document.getElementById('cGender').value = child.gender || '';
+      document.getElementById('cSchoolGrade').value = child.schoolGrade || '';
+      document.getElementById('cParentName').value = child.parentName || '';
+      document.getElementById('cRelationship').value = child.relationship || child.parentRelation || '';
+      document.getElementById('cParentEmail').value = child.parentEmail || '';
+      document.getElementById('cParentMobile').value = child.parentMobileLine || child.parentMobile || '';
+      document.getElementById('cParentWhatsApp').value = child.parentWhatsAppLine || child.parentWhatsApp || '';
+      document.getElementById('cMentorship').value = child.personalPaidMentorship || 'No';
+      document.getElementById('cCountry').value = child.country || '';
+      document.getElementById('cHowHeard').value = child.howHeard || '';
+      document.getElementById('cMedicalNotes').value = child.medicalNotes || '';
+
+      document.getElementById('childModal').classList.add('active');
+    }
+
+    function closeChildModal() {
+      document.getElementById('childModal').classList.remove('active');
+    }
+
+    // Submit Child Form
+    document.getElementById('childForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const id = document.getElementById('childFormId').value;
+      const isEdit = id !== '';
+      
+      const payload = {
+        action: isEdit ? 'editRegistration' : 'addRegistration',
+        id: isEdit ? Number(id) : undefined,
+        childFirstName: document.getElementById('cFirstName').value.trim(),
+        childLastName: document.getElementById('cLastName').value.trim(),
+        childAge: document.getElementById('cAge').value,
+        childGender: document.getElementById('cGender').value,
+        childDOB: document.getElementById('cDOB').value,
+        schoolGrade: document.getElementById('cSchoolGrade').value.trim(),
+        parentName: document.getElementById('cParentName').value.trim(),
+        parentRelation: document.getElementById('cRelationship').value,
+        parentEmail: document.getElementById('cParentEmail').value.trim(),
+        parentMobile: document.getElementById('cParentMobile').value.trim(),
+        parentWhatsApp: document.getElementById('cParentWhatsApp').value.trim(),
+        mentorship: document.getElementById('cMentorship').value,
+        country: document.getElementById('cCountry').value.trim(),
+        howHeard: document.getElementById('cHowHeard').value.trim(),
+        medicalNotes: document.getElementById('cMedicalNotes').value.trim()
+      };
+
+      if (isEdit) {
+        const originalChild = store.registrations.find(r => r.id === Number(id));
+        if (originalChild) {
+          payload.timestamp = originalChild.timestamp;
+        }
+      }
+
+      closeChildModal();
+      document.getElementById('loadingOverlay').style.display = 'flex';
+
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        
+        if (result.result === 'success') {
+          await loadDashboardData();
+        } else {
+          alert('Error saving registration: ' + (result.message || 'Unknown error'));
+        }
+      } catch (err) {
+        console.error('Save error:', err);
+        alert('Failed to save registration. Please try again.');
+      } finally {
+        document.getElementById('loadingOverlay').style.display = 'none';
+      }
+    });
+
+    // Delete Registration
+    async function deleteRegistrationPrompt(childId, fullName) {
+      if (!confirm(`Are you sure you want to delete ${fullName}? This will remove them from the list.`)) {
+        return;
+      }
+      
+      document.getElementById('loadingOverlay').style.display = 'flex';
+      
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'deleteRegistration',
+            id: childId
+          })
+        });
+        const result = await response.json();
+        
+        if (result.result === 'success') {
+          await loadDashboardData();
+        } else {
+          alert('Error deleting registration: ' + (result.message || 'Unknown error'));
+        }
+      } catch (err) {
+        console.error('Delete error:', err);
+        alert('Failed to delete registration. Please try again.');
+      } finally {
+        document.getElementById('loadingOverlay').style.display = 'none';
+      }
     }
 
     // Run auth check on load

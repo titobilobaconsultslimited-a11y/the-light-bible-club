@@ -20,6 +20,88 @@ function doPost(e) {
     // Determine action
     const action = data.action;
     
+    if (action === "addRegistration") {
+      let sheet = ss.getSheetByName(SHEET_REGISTRATIONS);
+      if (!sheet) {
+        sheet = ss.insertSheet(SHEET_REGISTRATIONS);
+        sheet.appendRow([
+          "Timestamp", "Child First Name", "Child Last Name", "Age", "Gender", 
+          "Date of Birth", "School Grade", "Parent Name", "Relationship", "Parent Email", 
+          "Parent Mobile Line", "Parent WhatsApp Line", "Personal Paid Mentorship", "Country", 
+          "How Heard", "Medical Notes"
+        ]);
+      }
+      
+      const rowData = [
+        new Date().toLocaleString(),
+        data.childFirstName || "",
+        data.childLastName || "",
+        data.childAge || "",
+        data.childGender || "",
+        data.childDOB || "",
+        data.schoolGrade || "",
+        data.parentName || "",
+        data.parentRelation || "",
+        data.parentEmail || "",
+        data.parentMobile || "",
+        data.parentWhatsApp || "",
+        data.mentorship || "",
+        data.country || "",
+        data.howHeard || "",
+        data.medicalNotes || ""
+      ];
+      
+      sheet.appendRow(rowData);
+      const newId = sheet.getLastRow();
+      
+      return ContentService.createTextOutput(JSON.stringify({ result: "success", id: newId })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    if (action === "editRegistration") {
+      let sheet = ss.getSheetByName(SHEET_REGISTRATIONS);
+      const rowId = Number(data.id) + 1;
+      
+      if (!sheet || rowId <= 1 || rowId > sheet.getLastRow()) {
+        return ContentService.createTextOutput(JSON.stringify({ result: "error", message: "Invalid ID" })).setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      const values = [
+        data.timestamp || new Date().toLocaleString(),
+        data.childFirstName || "",
+        data.childLastName || "",
+        data.childAge || "",
+        data.childGender || "",
+        data.childDOB || "",
+        data.schoolGrade || "",
+        data.parentName || "",
+        data.parentRelation || "",
+        data.parentEmail || "",
+        data.parentMobile || "",
+        data.parentWhatsApp || "",
+        data.mentorship || "",
+        data.country || "",
+        data.howHeard || "",
+        data.medicalNotes || ""
+      ];
+      
+      sheet.getRange(rowId, 1, 1, values.length).setValues([values]);
+      
+      return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    if (action === "deleteRegistration") {
+      let sheet = ss.getSheetByName(SHEET_REGISTRATIONS);
+      const rowId = Number(data.id) + 1;
+      
+      if (!sheet || rowId <= 1 || rowId > sheet.getLastRow()) {
+        return ContentService.createTextOutput(JSON.stringify({ result: "error", message: "Invalid ID" })).setMimeType(ContentService.MimeType.JSON);
+      }
+      
+      sheet.getRange(rowId, 1).setValue("DELETED");
+      
+      return ContentService.createTextOutput(JSON.stringify({ result: "success" })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
     if (action === "importRegistrations") {
       let sheet = ss.getSheetByName(SHEET_REGISTRATIONS);
       if (!sheet) {
@@ -248,6 +330,7 @@ function doGet(e) {
       
       const celebrants = [];
       for (let i = 1; i < rows.length; i++) {
+        if (rows[i][0] === "DELETED" || rows[i][0] === "") continue;
         const dobVal = rows[i][dobColIndex];
         if (dobVal) {
           const dob = new Date(dobVal);
@@ -279,6 +362,7 @@ function doGet(e) {
       const rows = registrationsSheet.getDataRange().getValues();
       const headers = rows[0];
       for (let i = 1; i < rows.length; i++) {
+        if (rows[i][0] === "DELETED" || rows[i][0] === "") continue;
         const item = { id: i }; // Row index is the unique ID
         headers.forEach((header, colIndex) => {
           const propName = toCamelCase(header);
