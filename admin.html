@@ -1124,23 +1124,28 @@
     async function loadDashboardData() {
       document.getElementById('loadingOverlay').style.display = 'flex';
       try {
+        console.log('[Dashboard] Fetching data from:', APPS_SCRIPT_URL);
         const response = await fetch(APPS_SCRIPT_URL);
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         const data = await response.json();
         
-        if (data.error) {
-          throw new Error(data.error);
-        }
+        if (data.error) throw new Error('Apps Script error: ' + data.error);
         
         store.registrations = data.registrations || [];
         store.attendance = data.attendance || [];
         store.assignments = data.assignments || [];
         
+        console.log(`[Dashboard] Loaded: ${store.registrations.length} kids, ${store.attendance.length} attendance records, ${store.assignments.length} assignments`);
+        if (store.registrations.length > 0) {
+          console.log('[Dashboard] Sample record fields:', Object.keys(store.registrations[0]));
+        }
+        
         initSaturdaySelector();
         renderAllTabs();
         
       } catch (err) {
-        alert('Failed to load data. Please refresh and try again.');
-        console.error('Error fetching data:', err);
+        console.error('[Dashboard] LOAD ERROR:', err);
+        alert('Failed to load data.\n\nError: ' + err.message + '\n\nCheck the browser console (F12) for details.');
       } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
       }
@@ -1638,12 +1643,25 @@
 
     // One-click WhatsApp check-in (no modal — opens WhatsApp directly)
     function quickSendCheckIn(childId) {
-      const child = store.registrations.find(r => r.id === childId);
-      if (!child) return;
+      // Coerce to number — HTML onclick passes the value as a number literal but
+      // ensure we match regardless of type (sheet row IDs are integers)
+      const id = Number(childId);
+      const child = store.registrations.find(r => Number(r.id) === id);
+
+      if (!child) {
+        if (store.registrations.length === 0) {
+          alert('No data has loaded yet. Please wait for the dashboard to finish loading, then try again.');
+        } else {
+          alert('Could not find this child in the loaded data. Try refreshing the page.');
+        }
+        console.warn('[WhatsApp] Child not found. ID:', childId, '| Store size:', store.registrations.length);
+        return;
+      }
 
       const rawPhone = child.parentWhatsAppLine || child.parentWhatsApp;
       if (!rawPhone) {
-        alert(`WhatsApp number is missing for ${child.childFirstName} ${child.childLastName}.`);
+        alert(`No WhatsApp number on file for ${child.childFirstName} ${child.childLastName}.\nPlease edit their record and add a WhatsApp number.`);
+        console.warn('[WhatsApp] Missing phone for child:', child);
         return;
       }
 
@@ -1653,7 +1671,16 @@
 
       const message = `Hi ${parentName}! 👋 This is a friendly check-in from The Light Bible Club. We hope ${childName} is doing wonderfully and growing in God's Word! We look forward to seeing them this Saturday. God bless your family! ☀️🙏`;
 
-      window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
+      console.log(`[WhatsApp] Opening wa.me for ${child.childFirstName}, phone: +${formattedPhone}`);
+
+      // Use anchor click — more reliable than window.open in popup-blocker environments
+      const a = document.createElement('a');
+      a.href = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
 
     // Send WhatsApp messages (custom modal)
@@ -1851,6 +1878,29 @@
         document.getElementById('loadingOverlay').style.display = 'none';
       }
     }
+
+    // ─── Diagnostic helper ───────────────────────────────────────────────────
+    // Open browser console (F12) and type:  debugWA()  to run a full diagnosis
+    window.debugWA = function() {
+      console.group('=== WhatsApp Diagnostic Report ===');
+      console.log('Apps Script URL:', APPS_SCRIPT_URL);
+      console.log('Total registrations in store:', store.registrations.length);
+      if (store.registrations.length === 0) {
+        console.error('PROBLEM: store.registrations is empty! Data has not loaded.');
+        console.log('Fix: Check network tab (F12 > Network) for a failed request to the Apps Script URL.');
+      } else {
+        console.log('First record:', store.registrations[0]);
+        const missing = store.registrations.filter(r => !r.parentWhatsAppLine && !r.parentWhatsApp);
+        console.log(`Records missing WhatsApp number: ${missing.length} of ${store.registrations.length}`);
+        if (missing.length > 0) console.table(missing.map(r => ({ id: r.id, name: r.childFirstName + ' ' + r.childLastName, country: r.country })));
+        const sample = store.registrations[0];
+        const rawPhone = sample.parentWhatsAppLine || sample.parentWhatsApp;
+        const formatted = cleanWhatsAppPhone(rawPhone, sample.country);
+        console.log(`Phone format test on first record — raw: "${rawPhone}" | country: "${sample.country}" | formatted: "+${formatted}"`);
+      }
+      console.groupEnd();
+    };
+    // ─────────────────────────────────────────────────────────────────────────
 
     // Run auth check on load
     window.addEventListener('DOMContentLoaded', checkAuth);
