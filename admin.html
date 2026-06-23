@@ -1440,8 +1440,12 @@
           <td>${dobStr} <span style="font-size:0.8rem; color:var(--text-muted);">(Age ${child.age})</span></td>
           <td><strong>${child.parentName}</strong><br><span style="font-size:0.78rem; color:var(--text-muted);">${child.parentRelation || child.relationship}</span></td>
           <td>
-            <div style="font-size:0.85rem;">📞 ${child.parentMobileLine || child.parentMobile || 'N/A'}</div>
-            <div style="font-size:0.85rem; color:#27AE60; cursor:pointer;" onclick="sendWhatsAppReminder(${child.id}, 'checkup')">💬 <u>${child.parentWhatsAppLine || child.parentWhatsApp || 'N/A'}</u></div>
+            <div style="font-size:0.82rem; margin-bottom:3px;">📞 ${child.parentMobileLine || child.parentMobile || 'N/A'}</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:6px;">💬 ${child.parentWhatsAppLine || child.parentWhatsApp || 'N/A'}</div>
+            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+              <button class="whatsapp-action-btn" onclick="quickSendCheckIn(${child.id})" title="One-click check-in to parent on WhatsApp" style="font-size:0.72rem; padding:4px 8px; background:rgba(46,204,113,0.12); color:#27AE60;">⚡ Check-in</button>
+              <button class="whatsapp-action-btn" onclick="sendWhatsAppReminder(${child.id}, 'checkup')" title="Compose custom WhatsApp message" style="font-size:0.72rem; padding:4px 8px; background:rgba(27,54,93,0.08); color:var(--secondary); border-color:rgba(27,54,93,0.3);">✉️ Custom</button>
+            </div>
           </td>
           <td>
             <span style="padding: 4px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; background: ${child.personalPaidMentorship === 'Yes' ? 'rgba(255, 140, 0, 0.1)' : 'rgba(100,116,139,0.1)'}; color: ${child.personalPaidMentorship === 'Yes' ? 'var(--primary)' : 'var(--text-muted)'};">
@@ -1577,23 +1581,82 @@
       document.getElementById('whatsappModal').classList.remove('active');
     }
 
-    // Phone formatting helper
-    function cleanWhatsAppPhone(phone) {
+    // Country code map — add more countries as needed
+    const COUNTRY_CODE_MAP = {
+      'nigeria': '234', 'ghana': '233', 'kenya': '254', 'south africa': '27',
+      'uk': '44', 'united kingdom': '44', 'england': '44', 'scotland': '44', 'wales': '44',
+      'united states': '1', 'usa': '1', 'us': '1', 'canada': '1',
+      'cameroon': '237', 'senegal': '221', 'liberia': '231', 'sierra leone': '232',
+      'gambia': '220', 'zambia': '260', 'zimbabwe': '263', 'tanzania': '255',
+      'uganda': '256', 'ethiopia': '251', 'rwanda': '250', 'botswana': '267',
+      'namibia': '264', 'angola': '244', 'mozambique': '258', 'malawi': '265',
+      'togo': '228', 'benin': '229', "ivory coast": '225', "cote d'ivoire": '225',
+      'burkina faso': '226', 'mali': '223', 'niger': '227', 'chad': '235',
+      'germany': '49', 'france': '33', 'italy': '39', 'spain': '34',
+      'netherlands': '31', 'australia': '61', 'india': '91', 'brazil': '55',
+      'south korea': '82', 'china': '86', 'japan': '81', 'singapore': '65',
+      'malaysia': '60', 'indonesia': '62', 'philippines': '63', 'pakistan': '92',
+      'uae': '971', 'united arab emirates': '971', 'saudi arabia': '966'
+    };
+
+    function getCountryCode(country) {
+      if (!country) return null;
+      return COUNTRY_CODE_MAP[country.toLowerCase().trim()] || null;
+    }
+
+    // Phone formatting helper — uses registered country to auto-apply correct country code
+    function cleanWhatsAppPhone(phone, country) {
       if (!phone) return '';
-      let clean = phone.replace(/\D/g, ''); // Remove non-digits
-      
-      if (clean.length === 10 && (clean.startsWith('8') || clean.startsWith('7') || clean.startsWith('9'))) {
-        // e.g. 8023200821 -> prepend 234
-        clean = '234' + clean;
-      } else if (clean.length === 11 && clean.startsWith('0')) {
-        // e.g. 08023200821 -> replace leading 0 with 234
-        clean = '234' + clean.slice(1);
+      const raw = phone.trim();
+      let clean = raw.replace(/\D/g, ''); // Remove non-digits
+
+      // Already in international format (starts with +)
+      if (raw.startsWith('+')) return clean;
+
+      const code = getCountryCode(country) || '234'; // Default: Nigeria
+
+      // Number already has the country code prepended
+      if (clean.startsWith(code) && clean.length >= code.length + 7) return clean;
+
+      if (code === '234') {
+        // Nigerian number: 10-digit (e.g. 8012345678) or 11-digit with leading 0 (e.g. 08012345678)
+        if (clean.length === 10 && /^[789]/.test(clean)) {
+          clean = '234' + clean;
+        } else if (clean.length === 11 && clean.startsWith('0')) {
+          clean = '234' + clean.slice(1);
+        } else if (!clean.startsWith('234')) {
+          clean = '234' + (clean.startsWith('0') ? clean.slice(1) : clean);
+        }
+      } else {
+        // Generic: strip leading 0 (local trunk prefix), then prepend country code
+        if (clean.startsWith('0')) clean = clean.slice(1);
+        if (!clean.startsWith(code)) clean = code + clean;
       }
-      
+
       return clean;
     }
 
-    // Send WhatsApp messages
+    // One-click WhatsApp check-in (no modal — opens WhatsApp directly)
+    function quickSendCheckIn(childId) {
+      const child = store.registrations.find(r => r.id === childId);
+      if (!child) return;
+
+      const rawPhone = child.parentWhatsAppLine || child.parentWhatsApp;
+      if (!rawPhone) {
+        alert(`WhatsApp number is missing for ${child.childFirstName} ${child.childLastName}.`);
+        return;
+      }
+
+      const formattedPhone = cleanWhatsAppPhone(rawPhone, child.country);
+      const parentName = child.parentName || 'Parent';
+      const childName = child.childFirstName || 'your child';
+
+      const message = `Hi ${parentName}! 👋 This is a friendly check-in from The Light Bible Club. We hope ${childName} is doing wonderfully and growing in God's Word! We look forward to seeing them this Saturday. God bless your family! ☀️🙏`;
+
+      window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    // Send WhatsApp messages (custom modal)
     function sendWhatsAppReminder(childId, type, status) {
       const child = store.registrations.find(r => r.id === childId);
       if (!child) return;
@@ -1604,7 +1667,7 @@
         return;
       }
 
-      const formattedPhone = cleanWhatsAppPhone(rawPhone);
+      const formattedPhone = cleanWhatsAppPhone(rawPhone, child.country);
       
       activeWAMember = child;
       
