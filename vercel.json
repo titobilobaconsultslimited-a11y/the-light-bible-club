@@ -3,5 +3,11 @@
     "api/**/*.js": {
       "includeFiles": "schema.sql"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    }
+  ]
 }

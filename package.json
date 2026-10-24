@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "import:sheets": "node scripts/import-google-sheets.js",
-    "check": "node --check server.js && node --check \"api/[...path].js\" && node --check scripts/import-google-sheets.js"
+    "check": "node --check server.js && node --check api/index.js && node --check \"api/[...path].js\" && node --check scripts/import-google-sheets.js"
   },
   "engines": {
     "node": "22.x"

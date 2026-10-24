@@ -62,3 +62,12 @@ CREATE TABLE IF NOT EXISTS birthday_email_log (
 CREATE INDEX IF NOT EXISTS children_birthdays_idx
   ON children (EXTRACT(MONTH FROM date_of_birth), EXTRACT(DAY FROM date_of_birth))
   WHERE deleted_at IS NULL;
+
+CREATE TABLE IF NOT EXISTS site_sessions (
+  sid VARCHAR NOT NULL COLLATE "default",
+  sess JSON NOT NULL,
+  expire TIMESTAMP(6) NOT NULL,
+  CONSTRAINT site_sessions_pkey PRIMARY KEY (sid)
+);
+
+CREATE INDEX IF NOT EXISTS IDX_site_sessions_expire ON site_sessions (expire);

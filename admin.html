@@ -1095,6 +1095,19 @@
       });
     }
 
+    async function parseJsonResponse(response) {
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        try {
+          return await response.json();
+        } catch {
+          // fallback below
+        }
+      }
+      const rawText = (await response.text()).trim();
+      return { error: rawText.slice(0, 200) || `HTTP ${response.status}: ${response.statusText}` };
+    }
+
     async function callAdminApi(payload) {
       const isDataRequest = payload.action === 'adminData';
       const isLogout = payload.action === 'adminLogout';
@@ -1107,7 +1120,7 @@
           body: isDataRequest ? undefined : JSON.stringify(payload.action === 'adminLogout' ? {} : payload)
         }
       );
-      const result = await response.json();
+      const result = await parseJsonResponse(response);
       if (!response.ok) {
         if (response.status === 401) {
           loggedIn = false;
@@ -1140,7 +1153,7 @@
           credentials: 'same-origin',
           body: JSON.stringify({ email, password })
         });
-        const result = await response.json();
+        const result = await parseJsonResponse(response);
         if (!response.ok) {
           throw new Error(result.error || `HTTP ${response.status}: ${response.statusText}`);
         }

@@ -17,9 +17,9 @@ const PORT = Number(process.env.PORT || 3000);
 const SESSION_TTL_MS = 6 * 60 * 60 * 1000;
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 1,
-  connectionTimeoutMillis: 5000,
-  idleTimeoutMillis: 5000
+  max: 10,
+  connectionTimeoutMillis: 15000,
+  idleTimeoutMillis: 10000
 });
 const app = express();
 const PgSessionStore = connectPgSimple(session);
@@ -52,7 +52,7 @@ app.use(session({
   store: new PgSessionStore({
     pool,
     tableName: 'site_sessions',
-    createTableIfMissing: true
+    createTableIfMissing: false
   }),
   name: 'lightclub.sid',
   secret: process.env.SESSION_SECRET || '',
