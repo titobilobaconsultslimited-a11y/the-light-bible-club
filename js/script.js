@@ -61,9 +61,6 @@ document.querySelectorAll('.faq-question').forEach(btn => {
 });
 
 /* --------- Registration Form --------- */
-// 🔧 REPLACE THIS URL with your deployed Google Apps Script Web App URL
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFjl00dnSEShtwUg_vLUR4JsZRN1edrvX1J36dRFO4i9kwYOiTchrf69b3R3psTXb_/exec';
-
 const regForm = document.getElementById('registrationForm');
 if (regForm) {
   regForm.addEventListener('submit', async e => {
@@ -120,12 +117,13 @@ if (regForm) {
     submitBtn.disabled = true;
 
     try {
-      await fetch(APPS_SCRIPT_URL, {
+      const response = await fetch('/api/registrations', {
         method: 'POST',
-        // Send as text/plain to avoid CORS preflight issues with Google Apps Script
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Registration could not be submitted.');
 
       // Show success message
       regForm.style.display = 'none';
@@ -135,7 +133,7 @@ if (regForm) {
     } catch (err) {
       submitBtn.textContent = originalText;
       submitBtn.disabled = false;
-      alert('Something went wrong. Please try again or contact us directly.');
+      alert(err.message || 'Something went wrong. Please try again or contact us directly.');
       console.error('Form submission error:', err);
     }
   });
@@ -175,12 +173,13 @@ if (contactForm) {
     submitBtn.disabled = true;
 
     try {
-      await fetch(APPS_SCRIPT_URL, {
+      const response = await fetch('/api/contact', {
         method: 'POST',
-        // Send as text/plain to avoid CORS preflight issues with Google Apps Script
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Your message could not be sent.');
 
       // Show success message
       contactForm.style.display = 'none';
@@ -190,7 +189,7 @@ if (contactForm) {
     } catch (err) {
       submitBtn.textContent = originalText;
       submitBtn.disabled = false;
-      alert('Something went wrong. Please try again or contact us directly.');
+      alert(err.message || 'Something went wrong. Please try again or contact us directly.');
       console.error('Contact form submission error:', err);
     }
   });
@@ -348,7 +347,8 @@ window.restartQuiz  = restartQuiz;
 /* --------- Birthday Banner Overlay --------- */
 async function initBirthdayBanner() {
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=todayBirthdays`);
+    const res = await fetch('/api/today-birthdays');
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     const celebrants = await res.json();
     if (Array.isArray(celebrants) && celebrants.length > 0) {
       // Create the banner element
@@ -424,6 +424,4 @@ async function initBirthdayBanner() {
   }
 }
 
-if (typeof APPS_SCRIPT_URL !== 'undefined' && APPS_SCRIPT_URL) {
-  window.addEventListener('load', initBirthdayBanner);
-}
+window.addEventListener('load', initBirthdayBanner);

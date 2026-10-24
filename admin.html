@@ -439,6 +439,12 @@
       color: white;
     }
 
+    .action-btn:disabled,
+    .whatsapp-action-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
     /* --- Search & Filters Bar --- */
     .filter-bar {
       display: flex;
@@ -695,7 +701,7 @@
         <div class="birthday-badge-inline">🎂</div>
         <div class="birthday-info-inline" style="flex:1;">
           <h3 id="birthdayNoticeTitle">Happy Birthday!</h3>
-          <p id="birthdayNoticeText">Check the Birthdays tab to send them special direct WhatsApp wishes.</p>
+          <p id="birthdayNoticeText">Open the Birthdays tab to email their parent or draft a WhatsApp greeting to their guardian.</p>
         </div>
       </div>
 
@@ -828,6 +834,9 @@
 
     <!-- 5. BIRTHDAYS SCREEN -->
     <div id="birthdaysScreen" class="tab-screen">
+      <p style="margin-bottom: 20px; color: var(--text-muted);">
+        Birthday emails go to the parent/guardian on file. WhatsApp opens a message draft to the registered guardian number for you to review and send.
+      </p>
       <div style="margin-bottom: 24px;">
         <h3 style="font-size: 1.25rem; color: var(--secondary); margin-bottom: 12px;">🎉 Celebrating Today</h3>
         <div class="table-container">
@@ -836,7 +845,7 @@
               <tr>
                 <th>Child Name</th>
                 <th>Birthdate</th>
-                <th>Parent WhatsApp</th>
+                <th>Parent/Guardian Contact</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -855,7 +864,7 @@
               <tr>
                 <th>Child Name</th>
                 <th>Birthdate</th>
-                <th>Parent WhatsApp</th>
+                <th>Parent/Guardian Contact</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -1022,14 +1031,13 @@
   <!-- Script Logic -->
   <script>
     // Config
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxFjl00dnSEShtwUg_vLUR4JsZRN1edrvX1J36dRFO4i9kwYOiTchrf69b3R3psTXb_/exec';
-    
     // Auth & App state
     let loggedIn = false;
     let store = {
       registrations: [],
       attendance: [],
-      assignments: []
+      assignments: [],
+      birthdayEmails: []
     };
     
     // Date Helpers
@@ -1087,53 +1095,94 @@
       });
     }
 
+    async function callAdminApi(payload) {
+      const isDataRequest = payload.action === 'adminData';
+      const isLogout = payload.action === 'adminLogout';
+      const response = await fetch(
+        isDataRequest ? '/api/admin/data' : (isLogout ? '/api/auth/logout' : '/api/admin/actions'),
+        {
+          method: isDataRequest ? 'GET' : 'POST',
+          headers: isDataRequest ? {} : { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: isDataRequest ? undefined : JSON.stringify(payload.action === 'adminLogout' ? {} : payload)
+        }
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        if (response.status === 401) {
+          loggedIn = false;
+          document.getElementById('loginScreen').style.display = 'flex';
+          if (payload.action !== 'adminLogin') {
+            document.getElementById('loginError').textContent = 'Please sign in to access the admin dashboard.';
+            document.getElementById('loginError').style.display = 'block';
+          }
+        }
+        throw new Error(result.error || result.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      return result;
+    }
+
     // Authentication Checks
     const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('adminEmail').value.trim();
       const password = document.getElementById('adminPassword').value;
+      const loginError = document.getElementById('loginError');
+      const submitButton = loginForm.querySelector('[type="submit"]');
+      submitButton.disabled = true;
+      loginError.style.display = 'none';
 
-      if (email === 'lightspeechconsults@gmail.com' && password === 'Titilayo2026') {
-        sessionStorage.setItem('admin_auth', 'true');
-        document.getElementById('loginScreen').style.display = 'none';
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ email, password })
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.error || `HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        document.getElementById('adminPassword').value = '';
         loggedIn = true;
-        loadDashboardData();
-      } else {
-        document.getElementById('loginError').style.display = 'block';
+        await loadDashboardData();
+      } catch (err) {
+        loginError.textContent = err.message || 'Unable to sign in. Please try again.';
+        loginError.style.display = 'block';
+      } finally {
+        submitButton.disabled = false;
       }
     });
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      sessionStorage.removeItem('admin_auth');
-      location.reload();
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await callAdminApi({ action: 'adminLogout' });
+      } catch (err) {
+        console.error('Could not end the admin session:', err);
+      } finally {
+        location.reload();
+      }
     });
 
     // Check existing auth session
     function checkAuth() {
-      if (sessionStorage.getItem('admin_auth') === 'true') {
-        document.getElementById('loginScreen').style.display = 'none';
-        loggedIn = true;
-        loadDashboardData();
-      } else {
-        document.getElementById('loadingOverlay').style.display = 'none';
-      }
+      loadDashboardData();
     }
 
     // API Loading
     async function loadDashboardData() {
       document.getElementById('loadingOverlay').style.display = 'flex';
       try {
-        console.log('[Dashboard] Fetching data from:', APPS_SCRIPT_URL);
-        const response = await fetch(APPS_SCRIPT_URL);
-        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        const data = await response.json();
-        
-        if (data.error) throw new Error('Apps Script error: ' + data.error);
+        const data = await callAdminApi({ action: 'adminData' });
         
         store.registrations = data.registrations || [];
         store.attendance = data.attendance || [];
         store.assignments = data.assignments || [];
+        store.birthdayEmails = data.birthdayEmails || [];
+        document.getElementById('loginScreen').style.display = 'none';
+        loggedIn = true;
         
         console.log(`[Dashboard] Loaded: ${store.registrations.length} kids, ${store.attendance.length} attendance records, ${store.assignments.length} assignments`);
         if (store.registrations.length > 0) {
@@ -1145,7 +1194,18 @@
         
       } catch (err) {
         console.error('[Dashboard] LOAD ERROR:', err);
-        alert('Failed to load data.\n\nError: ' + err.message + '\n\nCheck the browser console (F12) for details.');
+        if (err.message.toLowerCase().includes('session expired') || err.message.toLowerCase().includes('unauthorized')) {
+          loggedIn = false;
+          document.getElementById('loginScreen').style.display = 'flex';
+          document.getElementById('loginError').textContent = 'Your admin session expired. Please sign in again.';
+          document.getElementById('loginError').style.display = 'block';
+        } else if (!loggedIn) {
+          document.getElementById('loginScreen').style.display = 'flex';
+          document.getElementById('loginError').textContent = `Could not connect to the admin service: ${err.message}`;
+          document.getElementById('loginError').style.display = 'block';
+        } else {
+          alert('Failed to load data.\n\nError: ' + err.message + '\n\nCheck the browser console (F12) for details.');
+        }
       } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
       }
@@ -1300,6 +1360,7 @@
       
       // Update local store immediately for instant response
       const index = store.attendance.findIndex(a => a.childId === childId && a.date === selectedWeek);
+      const previousStatus = index > -1 ? store.attendance[index].status : null;
       if (index > -1) {
         store.attendance[index].status = status;
       } else {
@@ -1317,19 +1378,23 @@
 
       // Save to server
       try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'markAttendance',
-            childId: childId,
-            childName: firstName,
-            date: selectedWeek,
-            status: status
-          })
+        await callAdminApi({
+          action: 'markAttendance',
+          childId: childId,
+          childName: firstName,
+          date: selectedWeek,
+          status: status
         });
       } catch (err) {
         console.error('Failed to save attendance:', err);
+        if (index > -1) {
+          store.attendance[index].status = previousStatus;
+        } else {
+          store.attendance = store.attendance.filter(a => a.childId !== childId || a.date !== selectedWeek);
+        }
+        renderAttendance();
+        updateAnalytics();
+        alert(`Could not save attendance: ${err.message}`);
       }
     }
 
@@ -1379,6 +1444,7 @@
       
       // Update local store immediately for instant response
       const index = store.assignments.findIndex(a => a.childId === childId && a.week === selectedWeek);
+      const previousStatus = index > -1 ? store.assignments[index].status : null;
       if (index > -1) {
         store.assignments[index].status = status;
       } else {
@@ -1396,19 +1462,23 @@
 
       // Save to server
       try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'markAssignment',
-            childId: childId,
-            childName: firstName,
-            week: selectedWeek,
-            status: status
-          })
+        await callAdminApi({
+          action: 'markAssignment',
+          childId: childId,
+          childName: firstName,
+          week: selectedWeek,
+          status: status
         });
       } catch (err) {
         console.error('Failed to save assignment status:', err);
+        if (index > -1) {
+          store.assignments[index].status = previousStatus;
+        } else {
+          store.assignments = store.assignments.filter(a => a.childId !== childId || a.week !== selectedWeek);
+        }
+        renderAssignments();
+        updateAnalytics();
+        alert(`Could not save assignment status: ${err.message}`);
       }
     }
 
@@ -1515,48 +1585,85 @@
       // Sort upcoming
       upcomingList.sort((a, b) => a.daysAway - b.daysAway);
 
+      function appendBirthdayRow(tbody, item, isToday) {
+        const child = item.child;
+        const year = new Date().getFullYear();
+        const emailSent = store.birthdayEmails.some(entry =>
+          Number(entry.childId) === Number(child.id) && Number(entry.year) === year
+        );
+        const email = child.parentEmail || '';
+        const whatsapp = child.parentWhatsAppLine || child.parentWhatsApp || '';
+        const tr = document.createElement('tr');
+        const nameCell = document.createElement('td');
+        const dateCell = document.createElement('td');
+        const contactCell = document.createElement('td');
+        const actionCell = document.createElement('td');
+        const name = document.createElement('strong');
+        const emailDetail = document.createElement('div');
+        const whatsappDetail = document.createElement('div');
+
+        name.textContent = `${child.childFirstName || ''} ${child.childLastName || ''}`.trim();
+        nameCell.appendChild(name);
+        dateCell.textContent = `${item.dob.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}${isToday ? ` (Age ${child.age || 'N/A'})` : ` (${item.daysAway} days away)`}`;
+        emailDetail.textContent = email ? `Email: ${email}` : 'Parent email missing';
+        whatsappDetail.textContent = whatsapp ? `WhatsApp: ${whatsapp}` : 'Parent WhatsApp missing';
+        contactCell.append(emailDetail, whatsappDetail);
+
+        const emailButton = document.createElement('button');
+        emailButton.type = 'button';
+        emailButton.className = 'action-btn';
+        emailButton.textContent = emailSent ? '✅ Email Sent' : '📧 Email Parent';
+        emailButton.disabled = emailSent || !email;
+        emailButton.title = emailSent ? 'A birthday email was sent this year' : (email ? 'Send a birthday email to the parent/guardian' : 'Add a parent/guardian email address first');
+        emailButton.addEventListener('click', () => sendBirthdayEmail(child.id, emailButton));
+
+        const whatsappButton = document.createElement('button');
+        whatsappButton.type = 'button';
+        whatsappButton.className = 'whatsapp-action-btn';
+        whatsappButton.textContent = isToday ? '🎂 WhatsApp Guardian' : '🎉 WhatsApp Guardian';
+        whatsappButton.disabled = !whatsapp;
+        whatsappButton.title = whatsapp ? 'Open a birthday message draft to the parent/guardian' : 'Add a parent/guardian WhatsApp number first';
+        whatsappButton.addEventListener('click', () => sendWhatsAppReminder(child.id, 'birthday'));
+
+        actionCell.append(emailButton, whatsappButton);
+        tr.append(nameCell, dateCell, contactCell, actionCell);
+        tbody.appendChild(tr);
+      }
+
       // Render today
       if (todayList.length === 0) {
         todayBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No birthdays celebrating today.</td></tr>`;
       } else {
-        todayList.forEach(item => {
-          const c = item.child;
-          const formattedDob = item.dob.toLocaleDateString(undefined, {month:'long', day:'numeric', year:'numeric'});
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><strong>${c.childFirstName} ${c.childLastName}</strong></td>
-            <td>${formattedDob} (Age ${c.age})</td>
-            <td>${c.parentWhatsAppLine || c.parentWhatsApp || 'N/A'}</td>
-            <td>
-              <button class="whatsapp-action-btn" onclick="sendWhatsAppReminder(${c.id}, 'birthday')">
-                🎂 Send Birthday Wishes
-              </button>
-            </td>
-          `;
-          todayBody.appendChild(tr);
-        });
+        todayList.forEach(item => appendBirthdayRow(todayBody, item, true));
       }
 
       // Render upcoming
       if (upcomingList.length === 0) {
         upcomingBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No upcoming birthdays within next 30 days.</td></tr>`;
       } else {
-        upcomingList.forEach(item => {
-          const c = item.child;
-          const formattedDob = item.dob.toLocaleDateString(undefined, {month:'long', day:'numeric', year:'numeric'});
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><strong>${c.childFirstName} ${c.childLastName}</strong></td>
-            <td>${formattedDob} (${item.daysAway} days away)</td>
-            <td>${c.parentWhatsAppLine || c.parentWhatsApp || 'N/A'}</td>
-            <td>
-              <button class="whatsapp-action-btn" onclick="sendWhatsAppReminder(${c.id}, 'birthday')">
-                🎉 Send Early Greeting
-              </button>
-            </td>
-          `;
-          upcomingBody.appendChild(tr);
-        });
+        upcomingList.forEach(item => appendBirthdayRow(upcomingBody, item, false));
+      }
+    }
+
+    async function sendBirthdayEmail(childId, button) {
+      const child = store.registrations.find(record => Number(record.id) === Number(childId));
+      if (!child || !child.parentEmail) {
+        alert('A parent/guardian email address is not on file for this member.');
+        return;
+      }
+      const childName = `${child.childFirstName || ''} ${child.childLastName || ''}`.trim();
+      if (!confirm(`Send a birthday greeting for ${childName} to ${child.parentName || 'their parent/guardian'} at ${child.parentEmail}?`)) return;
+
+      button.disabled = true;
+      button.textContent = 'Sending…';
+      try {
+        await callAdminApi({ action: 'sendBirthdayEmail', childId: child.id });
+        await loadDashboardData();
+        alert(`Birthday email sent to ${child.parentEmail}.`);
+      } catch (err) {
+        button.disabled = false;
+        button.textContent = '📧 Email Parent';
+        alert(`Could not send birthday email: ${err.message}`);
       }
     }
 
@@ -1576,7 +1683,7 @@
         attendance_absent: `Hi ${parentName}, we missed ${childName} at The Light Bible Club today! We hope everything is fine. Here is a quick memory verse to encourage them: "The Lord is my shepherd; I shall not want." We look forward to seeing them next Saturday! 🙏`,
         assignment_done: `Hi ${parentName}, fantastic job to ${childName} for submitting their Bible club assignment! We are so proud of their diligence and growth in God's Word. Keep shining! 🌟`,
         assignment_not_done: `Hi ${parentName}, this is a gentle reminder from The Light Bible Club about ${childName}'s weekly assignment. Completing it helps reinforce the lesson! Let us know if you need any help with it. Blessings! 📖`,
-        birthday: `Hi ${parentName}, wishing ${childName} a very Happy Birthday today! May they grow in wisdom, stature, and favor with God and man. We celebrate them! 🎂🎉`
+        birthday: `Hi ${parentName}, wishing ${childName} a very Happy Birthday! May they grow in wisdom, stature, and favor with God and man. We celebrate them! 🎂🎉`
       };
       
       textarea.value = templates[select.value] || '';
@@ -1827,21 +1934,11 @@
       document.getElementById('loadingOverlay').style.display = 'flex';
 
       try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-        const result = await response.json();
-        
-        if (result.result === 'success') {
-          await loadDashboardData();
-        } else {
-          alert('Error saving registration: ' + (result.message || 'Unknown error'));
-        }
+        await callAdminApi(payload);
+        await loadDashboardData();
       } catch (err) {
         console.error('Save error:', err);
-        alert('Failed to save registration. Please try again.');
+        alert('Failed to save registration: ' + err.message);
       } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
       }
@@ -1856,24 +1953,11 @@
       document.getElementById('loadingOverlay').style.display = 'flex';
       
       try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'deleteRegistration',
-            id: childId
-          })
-        });
-        const result = await response.json();
-        
-        if (result.result === 'success') {
-          await loadDashboardData();
-        } else {
-          alert('Error deleting registration: ' + (result.message || 'Unknown error'));
-        }
+        await callAdminApi({ action: 'deleteRegistration', id: childId });
+        await loadDashboardData();
       } catch (err) {
         console.error('Delete error:', err);
-        alert('Failed to delete registration. Please try again.');
+        alert('Failed to delete registration: ' + err.message);
       } finally {
         document.getElementById('loadingOverlay').style.display = 'none';
       }
@@ -1883,7 +1967,7 @@
     // Open browser console (F12) and type:  debugWA()  to run a full diagnosis
     window.debugWA = function() {
       console.group('=== WhatsApp Diagnostic Report ===');
-      console.log('Apps Script URL:', APPS_SCRIPT_URL);
+      console.log('API endpoint:', window.location.origin + '/api');
       console.log('Total registrations in store:', store.registrations.length);
       if (store.registrations.length === 0) {
         console.error('PROBLEM: store.registrations is empty! Data has not loaded.');
