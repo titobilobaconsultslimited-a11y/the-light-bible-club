@@ -6,7 +6,7 @@
 // =====================================================
 
 // Change this to your email address to receive notifications
-const NOTIFICATION_EMAIL = "lightspeechconsults@gmail.com";
+const NOTIFICATION_EMAIL = "thelightonlinebibleclub@gmail.com";
 
 const SHEET_REGISTRATIONS = "Registrations";
 const SHEET_CONTACT = "ContactMessages";

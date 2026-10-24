@@ -7,7 +7,8 @@
   "scripts": {
     "import:sheets": "node scripts/import-google-sheets.js",
     "import:documents": "node scripts/import-contacts-from-documents.js",
-    "check": "node --check server.js && node --check api/index.js && node --check \"api/[...path].js\" && node --check scripts/import-google-sheets.js && node --check scripts/import-contacts-from-documents.js"
+    "test:smtp": "node scripts/test-smtp.js",
+    "check": "node --check server.js && node --check api/index.js && node --check \"api/[...path].js\" && node --check scripts/import-google-sheets.js && node --check scripts/import-contacts-from-documents.js && node --check scripts/test-smtp.js"
   },
   "engines": {
     "node": "22.x"
