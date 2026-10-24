@@ -1117,12 +1117,35 @@
               </small>
             </div>
 
+            <!-- Batch Range Selector (for Group sending) -->
+            <div id="batchSelectorContainer" class="form-group" style="background: #F8FAFC; border: 1px solid var(--border); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label for="broadcastBatchSelect" style="font-weight: 600; font-size: 0.85rem; color: var(--secondary); margin: 0;">
+                  📦 Sending Batch (Recommended: 25 per batch):
+                </label>
+                <span id="batchCountBadge" style="font-size: 0.75rem; background: rgba(255,140,0,0.12); color: var(--primary); padding: 2px 8px; border-radius: 6px; font-weight: 600;">Safe Mode</span>
+              </div>
+              <select id="broadcastBatchSelect" class="form-control" onchange="handleBatchSelectChange()">
+                <!-- Populated dynamically via JS -->
+              </select>
+              <div id="batchDetailText" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">
+                Sending in batches of 25 ensures reliable delivery, complies with Gmail burst rate limits, and prevents timeouts.
+              </div>
+            </div>
+
             <!-- Single Child Selector (hidden by default) -->
-            <div id="singleChildGroup" class="form-group" style="display: none;">
-              <label for="broadcastChildSelect">Select Child / Parent:</label>
+            <div id="singleChildGroup" class="form-group" style="display: none; background: #F8FAFC; border: 1px solid var(--border); padding: 14px; border-radius: 12px; margin-bottom: 18px;">
+              <label for="broadcastChildSelect" style="font-weight: 600; font-size: 0.85rem; color: var(--secondary); display: block; margin-bottom: 6px;">
+                Select Child / Parent to Email Directly:
+              </label>
               <select id="broadcastChildSelect" class="form-control" onchange="handleSingleChildChange()">
                 <!-- Populated dynamically via JS -->
               </select>
+              <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Quick Personal Test:</span>
+                <button type="button" class="var-pill-btn" onclick="selectPersonalTest('fatore')" title="Send test to yommiefatore@gmail.com (Daniel Fatore)">👤 Daniel Fatore (yommiefatore@gmail.com)</button>
+                <button type="button" class="var-pill-btn" onclick="selectPersonalTest('titobiloba')" title="Send test to titobilobaconsultslimited@gmail.com (Josiah)">👤 Josiah Titobiloba (titobiloba...)</button>
+              </div>
             </div>
 
             <!-- Subject Line -->
@@ -1215,6 +1238,49 @@
     </div>
 
   </main>
+
+  <!-- Broadcast Result Modal -->
+  <div id="broadcastResultModal" class="whatsapp-modal">
+    <div class="whatsapp-modal-content" style="max-width: 540px;">
+      <div class="whatsapp-modal-header" style="background: linear-gradient(135deg, var(--secondary) 0%, #0F172A 100%); color: white;">
+        <h3 id="bResultModalTitle" style="color: white; font-size: 1.15rem;">📊 Email Dispatch Report</h3>
+        <button onclick="closeBroadcastResultModal()" class="close-modal-btn" style="color: white;">&times;</button>
+      </div>
+      <div class="whatsapp-modal-body" style="padding: 24px;">
+        <div id="bResultSuccessBanner" style="background: rgba(46, 204, 113, 0.12); border: 1px solid rgba(46, 204, 113, 0.3); border-radius: 12px; padding: 14px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px;">
+          <span style="font-size: 1.8rem; line-height: 1;">🎉</span>
+          <div>
+            <h4 id="bResultSuccessHeading" style="color: #27AE60; font-size: 1rem; margin-bottom: 2px;">Batch Delivered Successfully!</h4>
+            <p id="bResultSuccessText" style="font-size: 0.84rem; color: var(--text); margin: 0; line-height: 1.4;"></p>
+          </div>
+        </div>
+
+        <div id="bResultNextBatchCard" style="display: none; background: #FFF5EB; border: 1px solid rgba(255, 140, 0, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+          <h4 style="color: var(--primary); font-size: 0.95rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+            <span>📦</span> Ready to Send Next Batch?
+          </h4>
+          <p id="bResultNextBatchText" style="font-size: 0.82rem; color: var(--text); margin-bottom: 12px; line-height: 1.4;"></p>
+          <button type="button" id="bResultNextBatchBtn" class="btn btn-primary" onclick="proceedToNextBatch()" style="font-size: 0.92rem; padding: 10px 18px; width: 100%;">
+            <span>🚀</span> Send Next Batch Now
+          </button>
+        </div>
+
+        <div id="bResultErrorsCard" style="display: none; background: rgba(231, 76, 60, 0.08); border: 1px solid rgba(231, 76, 60, 0.25); border-radius: 12px; padding: 12px; margin-bottom: 16px;">
+          <h4 style="color: var(--red); font-size: 0.88rem; margin-bottom: 4px;">Notice / Delivery Note</h4>
+          <p id="bResultErrorsText" style="font-size: 0.8rem; color: var(--text); margin: 0; line-height: 1.4;"></p>
+        </div>
+
+        <div>
+          <label style="font-size: 0.8rem; font-weight: 600; color: var(--secondary); display: block; margin-bottom: 6px;">Recipients Delivered in this Send:</label>
+          <div id="bResultRecipientsList" style="max-height: 130px; overflow-y: auto; background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.78rem; font-family: monospace; color: var(--text); line-height: 1.6;">
+          </div>
+        </div>
+      </div>
+      <div class="whatsapp-modal-footer">
+        <button onclick="closeBroadcastResultModal()" class="btn btn-primary" style="width: auto;">Done</button>
+      </div>
+    </div>
+  </div>
 
   <!-- WhatsApp Custom Message Modal -->
   <div id="whatsappModal" class="whatsapp-modal">
@@ -2441,14 +2507,19 @@ The Light Bible Club Team`
     function handleBroadcastGroupChange() {
       const group = document.getElementById('broadcastGroupSelect').value;
       const singleGroup = document.getElementById('singleChildGroup');
+      const batchContainer = document.getElementById('batchSelectorContainer');
       const summary = document.getElementById('broadcastAudienceSummary');
 
       if (group === 'single') {
-        singleGroup.style.display = 'block';
+        if (singleGroup) singleGroup.style.display = 'block';
+        if (batchContainer) batchContainer.style.display = 'none';
         populateSingleChildSelect();
         handleSingleChildChange();
       } else {
-        singleGroup.style.display = 'none';
+        if (singleGroup) singleGroup.style.display = 'none';
+        if (batchContainer) batchContainer.style.display = 'block';
+        buildBatchOptions();
+
         if (group === 'mentorship') {
           const count = store.registrations.filter(r => (r.personalPaidMentorship || '').toLowerCase().startsWith('y')).length;
           summary.textContent = `Will send individual personalized emails to all parents in the Mentorship program (~${count} children).`;
@@ -2458,6 +2529,103 @@ The Light Bible Club Team`
         }
       }
       updateBroadcastPreview();
+    }
+
+    function getUniqueParentsForGroup(group) {
+      let list = [...store.registrations].filter(r => (r.parentEmail || '').trim());
+      if (group === 'mentorship') {
+        list = list.filter(r => (r.personalPaidMentorship || '').toLowerCase().startsWith('y'));
+      }
+      list.sort((a, b) => (a.parentEmail || '').toLowerCase().localeCompare((b.parentEmail || '').toLowerCase()));
+      const seen = new Set();
+      const distinct = [];
+      list.forEach(item => {
+        const em = (item.parentEmail || '').toLowerCase().trim();
+        if (em && !seen.has(em)) {
+          seen.add(em);
+          distinct.push(item);
+        }
+      });
+      return distinct;
+    }
+
+    function buildBatchOptions(preferredOffset = null) {
+      const group = document.getElementById('broadcastGroupSelect')?.value || 'all';
+      const select = document.getElementById('broadcastBatchSelect');
+      const badge = document.getElementById('batchCountBadge');
+      if (!select) return;
+
+      select.innerHTML = '';
+      if (group === 'single') return;
+
+      const distinctParents = getUniqueParentsForGroup(group);
+      const total = distinctParents.length;
+      const batchSize = 25;
+      const totalBatches = Math.ceil(total / batchSize) || 1;
+
+      if (badge) badge.textContent = `${total} Parents Total`;
+
+      for (let b = 0; b < totalBatches; b++) {
+        const start = b * batchSize;
+        const end = Math.min(start + batchSize, total);
+        const firstEmail = distinctParents[start] ? distinctParents[start].parentEmail : '';
+        const lastEmail = distinctParents[end - 1] ? distinctParents[end - 1].parentEmail : '';
+        const option = document.createElement('option');
+        option.value = `${start},${batchSize}`;
+        option.textContent = `Batch ${b + 1} (${start + 1} - ${end}): ${firstEmail.slice(0, 14)}... → ${lastEmail.slice(0, 14)}...`;
+        if (preferredOffset !== null && start === Number(preferredOffset)) {
+          option.selected = true;
+        } else if (preferredOffset === null && b === 0) {
+          option.selected = true;
+        }
+        select.appendChild(option);
+      }
+
+      // Full list option
+      const allOpt = document.createElement('option');
+      allOpt.value = `0,${total},all`;
+      allOpt.textContent = `⚡ Send Entire List at Once (${total} Parents)`;
+      select.appendChild(allOpt);
+
+      handleBatchSelectChange();
+    }
+
+    function handleBatchSelectChange() {
+      const select = document.getElementById('broadcastBatchSelect');
+      const detail = document.getElementById('batchDetailText');
+      if (!select || !detail) return;
+
+      const val = select.value;
+      if (val.includes('all')) {
+        detail.textContent = 'Will attempt all parents in a single continuous request. Note: Free Gmail accounts created recently may enforce burst rate limits.';
+      } else {
+        const parts = val.split(',');
+        const start = parseInt(parts[0], 10) + 1;
+        const count = parseInt(parts[1], 10);
+        detail.textContent = `Will send safely to up to ${count} parents starting from recipient #${start}. Complies with Gmail anti-abuse burst limits.`;
+      }
+      updateBroadcastPreview();
+    }
+
+    function selectPersonalTest(keyword) {
+      document.getElementById('broadcastGroupSelect').value = 'single';
+      handleBroadcastGroupChange();
+
+      const select = document.getElementById('broadcastChildSelect');
+      if (!select) return;
+
+      const kw = keyword.toLowerCase();
+      const targetChild = store.registrations.find(r => 
+        (r.parentEmail || '').toLowerCase().includes(kw) ||
+        (r.parentName || '').toLowerCase().includes(kw) ||
+        (r.childFirstName || '').toLowerCase().includes(kw) ||
+        (r.childLastName || '').toLowerCase().includes(kw)
+      );
+
+      if (targetChild) {
+        select.value = targetChild.id;
+        handleSingleChildChange();
+      }
     }
 
     function populateSingleChildSelect(selectedId = null) {
@@ -2556,8 +2724,7 @@ The Light Bible Club Team`
 
       const groupEl = document.getElementById('broadcastGroupSelect');
       if (groupEl) groupEl.value = 'single';
-      const singleGroup = document.getElementById('singleChildGroup');
-      if (singleGroup) singleGroup.style.display = 'block';
+      handleBroadcastGroupChange();
 
       populateSingleChildSelect(childId);
       handleSingleChildChange();
@@ -2644,7 +2811,72 @@ The Light Bible Club Team`;
       }
 
       populateSingleChildSelect();
+      buildBatchOptions();
       updateBroadcastPreview();
+    }
+
+    window._lastBroadcastResult = null;
+
+    function openBroadcastResultModal(result) {
+      window._lastBroadcastResult = result;
+      const modal = document.getElementById('broadcastResultModal');
+      const heading = document.getElementById('bResultSuccessHeading');
+      const text = document.getElementById('bResultSuccessText');
+      const nextCard = document.getElementById('bResultNextBatchCard');
+      const nextText = document.getElementById('bResultNextBatchText');
+      const errCard = document.getElementById('bResultErrorsCard');
+      const errText = document.getElementById('bResultErrorsText');
+      const listEl = document.getElementById('bResultRecipientsList');
+
+      heading.textContent = `Delivered to ${result.sentCount} ${result.sentCount === 1 ? 'Parent' : 'Parents'}!`;
+      text.textContent = `Personalized and dispatched via Google SMTP. Total in this batch: ${result.batchSize || result.sentCount}.`;
+
+      // Next Batch button
+      if (result.nextBatchOffset !== null && result.nextBatchOffset !== undefined) {
+        nextCard.style.display = 'block';
+        nextText.textContent = `There are ${result.totalAvailable - result.nextBatchOffset} parents remaining in the list. Click below to proceed with the next batch.`;
+      } else {
+        nextCard.style.display = 'none';
+      }
+
+      // Errors card
+      if (result.errors && result.errors.length > 0) {
+        errCard.style.display = 'block';
+        errText.textContent = `Notice from Google: "${result.errors[0].error}".`;
+      } else {
+        errCard.style.display = 'none';
+      }
+
+      // Recipients list
+      listEl.innerHTML = '';
+      const delivered = result.deliveredEmails || [];
+      if (delivered.length > 0) {
+        delivered.forEach((em, i) => {
+          const div = document.createElement('div');
+          div.textContent = `${i + 1}. ${em}`;
+          listEl.appendChild(div);
+        });
+      } else {
+        listEl.innerHTML = `<span style="color:var(--text-muted);">No recipients in this batch</span>`;
+      }
+
+      modal.classList.add('active');
+    }
+
+    function closeBroadcastResultModal() {
+      document.getElementById('broadcastResultModal').classList.remove('active');
+    }
+
+    function proceedToNextBatch() {
+      closeBroadcastResultModal();
+      if (!window._lastBroadcastResult || window._lastBroadcastResult.nextBatchOffset == null) return;
+      const nextOffset = window._lastBroadcastResult.nextBatchOffset;
+      buildBatchOptions(nextOffset);
+      
+      const form = document.getElementById('broadcastForm');
+      if (form) {
+        form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
 
     async function handleBroadcastSubmit(e) {
@@ -2664,14 +2896,32 @@ The Light Bible Club Team`;
         return;
       }
 
-      let audienceDesc = 'all parents';
-      if (group === 'mentorship') audienceDesc = 'all mentorship parents';
+      let batchOffset = 0;
+      let batchLimit = 25;
+      let batchMode = 'batch';
+
+      if (group !== 'single') {
+        const batchVal = document.getElementById('broadcastBatchSelect')?.value || '0,25';
+        if (batchVal.includes('all')) {
+          batchMode = 'all';
+        } else {
+          const parts = batchVal.split(',');
+          batchOffset = parseInt(parts[0], 10) || 0;
+          batchLimit = parseInt(parts[1], 10) || 25;
+        }
+      }
+
+      let audienceDesc = '';
       if (group === 'single') {
         const child = store.registrations.find(r => Number(r.id) === Number(childId));
         audienceDesc = child ? `${child.parentName || 'Parent'} (${child.parentEmail})` : 'the selected parent';
+      } else if (batchMode === 'all') {
+        audienceDesc = `all parents (${group === 'mentorship' ? 'Mentorship' : 'All Club'})`;
+      } else {
+        audienceDesc = `Batch (${batchLimit} parents, starting at #${batchOffset + 1})`;
       }
 
-      const confirmMsg = `Are you sure you want to send this email to ${audienceDesc}?\n\nSubject: "${subject}"\n\nEach recipient will receive a personalized email with their child's name.`;
+      const confirmMsg = `Send this email to ${audienceDesc}?\n\nSubject: "${subject}"`;
       if (!confirm(confirmMsg)) return;
 
       sendBtn.disabled = true;
@@ -2683,13 +2933,15 @@ The Light Bible Club Team`;
           action: 'sendBroadcastEmail',
           recipientGroup: group,
           childId: childId ? Number(childId) : undefined,
+          batchOffset: batchOffset,
+          batchLimit: batchLimit,
+          batchMode: batchMode,
           subject: subject,
           message: message
         });
 
         await loadDashboardData();
-
-        alert(`✅ Success!\n\n${result.message || 'Broadcast sent successfully.'}\nTotal emails dispatched: ${result.sentCount || 1}`);
+        openBroadcastResultModal(result);
       } catch (err) {
         console.error('Broadcast error:', err);
         alert(`❌ Could not complete email broadcast:\n\n${err.message}`);

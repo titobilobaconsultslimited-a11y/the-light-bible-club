@@ -109,10 +109,18 @@ function createMailer() {
   const password = process.env.SMTP_PASSWORD;
   if (!host || !user || !password) return null;
 
+  const port = Number(process.env.SMTP_PORT || 587);
+  const secure = process.env.SMTP_SECURE === 'true' || port === 465;
+
   return nodemailer.createTransport({
+    pool: true,
+    maxConnections: 1,
+    maxMessages: 100,
+    rateDelta: 1000,
+    rateLimit: 3,
     host,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: process.env.SMTP_SECURE === 'true',
+    port,
+    secure,
     auth: { user, pass: password }
   });
 }
@@ -571,10 +579,21 @@ app.post('/api/admin/actions', requireAdmin, async (req, res, next) => {
         return res.status(400).json({ error: 'No valid recipient email addresses found for this group.' });
       }
 
+      const totalAvailable = recipients.length;
+      let batchOffset = 0;
+      let batchLimit = totalAvailable;
+
+      if (recipientGroup !== 'single' && data.batchMode !== 'all') {
+        batchOffset = Math.max(0, parseInt(data.batchOffset, 10) || 0);
+        batchLimit = Math.min(30, Math.max(1, parseInt(data.batchLimit, 10) || 25));
+        recipients = recipients.slice(batchOffset, batchOffset + batchLimit);
+      }
+
       let sentCount = 0;
       const sendErrors = [];
 
-      for (const r of recipients) {
+      for (let i = 0; i < recipients.length; i++) {
+        const r = recipients[i];
         try {
           const personalizedBody = rawMessage
             .replace(/\{\{\s*parentName\s*\}\}/gi, r.parentName)
@@ -603,21 +622,38 @@ app.post('/api/admin/actions', requireAdmin, async (req, res, next) => {
             html: htmlBody
           });
           sentCount++;
+
+          if (i < recipients.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 150));
+          }
         } catch (err) {
           console.error(`Failed to send email to ${r.email}:`, err.message);
           sendErrors.push({ email: r.email, error: err.message });
         }
       }
 
+      let groupLabel = recipientGroup;
+      if (recipientGroup === 'single') {
+        groupLabel = `Individual (${recipients[0].parentName})`;
+      } else if (data.batchMode !== 'all') {
+        groupLabel = `${recipientGroup === 'mentorship' ? 'Mentorship' : 'All Parents'} (Batch: #${batchOffset + 1} to #${batchOffset + recipients.length} of ${totalAvailable})`;
+      }
+
       await pool.query(`
         INSERT INTO parent_announcements (subject, message, recipient_group, recipient_count)
         VALUES ($1, $2, $3, $4)
-      `, [subject, rawMessage, recipientGroup === 'single' ? `Individual (${recipients[0].parentName})` : recipientGroup, sentCount]);
+      `, [subject, rawMessage, groupLabel, sentCount]);
+
+      const nextBatchOffset = (batchOffset + recipients.length < totalAvailable) ? (batchOffset + recipients.length) : null;
 
       return res.json({
         result: 'success',
         sentCount,
-        totalRecipients: recipients.length,
+        batchSize: recipients.length,
+        batchOffset,
+        totalAvailable,
+        nextBatchOffset,
+        deliveredEmails: recipients.slice(0, sentCount).map(r => r.email),
         errors: sendErrors.length ? sendErrors.slice(0, 5) : undefined
       });
     }

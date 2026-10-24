@@ -1,7 +1,8 @@
 {
   "functions": {
     "api/**/*.js": {
-      "includeFiles": "schema.sql"
+      "includeFiles": "schema.sql",
+      "maxDuration": 15
     }
   },
   "rewrites": [
