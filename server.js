@@ -189,7 +189,7 @@ function requireFields(fields, names) {
 }
 
 async function getAdminData() {
-  const [children, attendance, assignments, birthdayEmails] = await Promise.all([
+  const [children, attendance, assignments, birthdayEmails, announcements] = await Promise.all([
     pool.query(`
       SELECT id, created_at AS timestamp,
         first_name AS "childFirstName", last_name AS "childLastName",
@@ -211,6 +211,11 @@ async function getAdminData() {
     `),
     pool.query(`
       SELECT child_id AS "childId", birthday_year AS year FROM birthday_email_log
+    `),
+    pool.query(`
+      SELECT id, subject, message, recipient_group AS "recipientGroup",
+        recipient_count AS "recipientCount", sent_at AS "sentAt"
+      FROM parent_announcements ORDER BY sent_at DESC LIMIT 50
     `)
   ]);
 
@@ -218,7 +223,8 @@ async function getAdminData() {
     registrations: children.rows,
     attendance: attendance.rows,
     assignments: assignments.rows,
-    birthdayEmails: birthdayEmails.rows
+    birthdayEmails: birthdayEmails.rows,
+    announcements: announcements.rows
   };
 }
 
@@ -498,6 +504,122 @@ app.post('/api/admin/actions', requireAdmin, async (req, res, next) => {
       } finally {
         client.release();
       }
+    }
+
+    if (action === 'sendBroadcastEmail') {
+      const subject = cleanText(data.subject, 300);
+      const rawMessage = String(data.message || '').trim().slice(0, 10000);
+      const recipientGroup = cleanText(data.recipientGroup, 50) || 'all';
+      const singleChildId = Number(data.childId);
+
+      if (!subject || !rawMessage) {
+        return res.status(400).json({ error: 'Please provide both an email subject and message body.' });
+      }
+
+      const mailer = createMailer();
+      if (!mailer || !getMailFrom()) {
+        return res.status(503).json({ error: 'Email sending is not configured. Set the SMTP environment variables on the server.' });
+      }
+
+      let recipients = [];
+      if (recipientGroup === 'single') {
+        if (!Number.isInteger(singleChildId) || singleChildId < 1) {
+          return res.status(400).json({ error: 'Invalid child selection.' });
+        }
+        const resKids = await pool.query(`
+          SELECT id, first_name AS "childFirstName", last_name AS "childLastName",
+            parent_name AS "parentName", parent_email AS "parentEmail"
+          FROM children
+          WHERE id = $1 AND deleted_at IS NULL
+        `, [singleChildId]);
+        if (!resKids.rowCount) return res.status(404).json({ error: 'Child record not found.' });
+        const k = resKids.rows[0];
+        if (!validEmail(k.parentEmail || '')) {
+          return res.status(400).json({ error: 'No valid parent email on file for this child.' });
+        }
+        recipients = [{ email: k.parentEmail.toLowerCase(), parentName: k.parentName || 'Parent/Guardian', childName: k.childFirstName }];
+      } else if (recipientGroup === 'mentorship') {
+        const resKids = await pool.query(`
+          SELECT DISTINCT ON (LOWER(parent_email))
+            parent_email AS "parentEmail", parent_name AS "parentName", first_name AS "childFirstName"
+          FROM children
+          WHERE deleted_at IS NULL AND parent_email IS NOT NULL AND parent_email != ''
+            AND LOWER(mentorship) LIKE 'y%'
+          ORDER BY LOWER(parent_email), id
+        `);
+        recipients = resKids.rows.filter(r => validEmail(r.parentEmail)).map(r => ({
+          email: r.parentEmail.toLowerCase(),
+          parentName: r.parentName || 'Parent/Guardian',
+          childName: r.childFirstName
+        }));
+      } else {
+        const resKids = await pool.query(`
+          SELECT DISTINCT ON (LOWER(parent_email))
+            parent_email AS "parentEmail", parent_name AS "parentName", first_name AS "childFirstName"
+          FROM children
+          WHERE deleted_at IS NULL AND parent_email IS NOT NULL AND parent_email != ''
+          ORDER BY LOWER(parent_email), id
+        `);
+        recipients = resKids.rows.filter(r => validEmail(r.parentEmail)).map(r => ({
+          email: r.parentEmail.toLowerCase(),
+          parentName: r.parentName || 'Parent/Guardian',
+          childName: r.childFirstName
+        }));
+      }
+
+      if (recipients.length === 0) {
+        return res.status(400).json({ error: 'No valid recipient email addresses found for this group.' });
+      }
+
+      let sentCount = 0;
+      const sendErrors = [];
+
+      for (const r of recipients) {
+        try {
+          const personalizedBody = rawMessage
+            .replace(/\{\{\s*parentName\s*\}\}/gi, r.parentName)
+            .replace(/\{\{\s*childName\s*\}\}/gi, r.childName || 'your child');
+
+          const htmlBody = `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #2D3748; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #E2E8F0; border-radius: 12px; background-color: #ffffff;">
+              <div style="text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid #FFF5EB;">
+                <span style="font-size: 40px; display: inline-block; margin-bottom: 8px;">☀️</span>
+                <h2 style="color: #FF8C00; margin: 0; font-size: 24px; font-weight: 700;">The Light Bible Club</h2>
+                <p style="color: #718096; font-size: 14px; margin: 4px 0 0;">Raising Children in God's Light & Truth</p>
+              </div>
+              <div style="white-space: pre-wrap; font-size: 15px; margin-bottom: 28px; color: #2D3748;">${personalizedBody.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+              <div style="margin-top: 32px; padding-top: 20px; border-top: 1px solid #EDF2F7; font-size: 13px; color: #718096; text-align: center;">
+                <p style="margin: 0 0 6px; font-weight: 600; color: #4A5568;">The Light Bible Club • Every Saturday</p>
+                <p style="margin: 0;">Have a prayer request or question? Simply reply to this email or reach us at <a href="mailto:${getMailFrom()}" style="color: #FF8C00; text-decoration: none; font-weight: 600;">${getMailFrom()}</a></p>
+              </div>
+            </div>
+          `;
+
+          await mailer.sendMail({
+            from: getMailFrom(),
+            to: r.email,
+            subject: subject,
+            text: personalizedBody,
+            html: htmlBody
+          });
+          sentCount++;
+        } catch (err) {
+          console.error(`Failed to send email to ${r.email}:`, err.message);
+          sendErrors.push({ email: r.email, error: err.message });
+        }
+      }
+
+      await pool.query(`
+        INSERT INTO parent_announcements (subject, message, recipient_group, recipient_count)
+        VALUES ($1, $2, $3, $4)
+      `, [subject, rawMessage, recipientGroup === 'single' ? `Individual (${recipients[0].parentName})` : recipientGroup, sentCount]);
+
+      return res.json({
+        result: 'success',
+        sentCount,
+        totalRecipients: recipients.length,
+        errors: sendErrors.length ? sendErrors.slice(0, 5) : undefined
+      });
     }
 
     return res.status(400).json({ error: 'Unknown admin action.' });

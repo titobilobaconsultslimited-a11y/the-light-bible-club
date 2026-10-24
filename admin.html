@@ -609,10 +609,168 @@
       gap: 16px;
     }
 
-    @media (max-width: 600px) {
-      .modal-grid-2col {
+    /* --- Broadcast Email Feature Styles --- */
+    .broadcast-templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .broadcast-template-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+    }
+
+    .broadcast-template-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -4px rgba(255, 140, 0, 0.15);
+    }
+
+    .broadcast-template-card.active {
+      border-color: var(--primary);
+      background: rgba(255, 140, 0, 0.04);
+      outline: 2px solid var(--primary);
+    }
+
+    .broadcast-template-card .icon {
+      font-size: 1.6rem;
+      margin-bottom: 2px;
+    }
+
+    .broadcast-template-card .title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--secondary);
+    }
+
+    .broadcast-template-card .desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .broadcast-composer-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 1024px) {
+      .broadcast-composer-grid {
         grid-template-columns: 1fr;
       }
+    }
+
+    .broadcast-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .var-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #EEF2F6;
+      border: 1px solid #CBD5E1;
+      color: var(--secondary);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: monospace;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    .var-pill-btn:hover {
+      background: #E2E8F0;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .email-preview-envelope {
+      background: #F1F5F9;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 0.88rem;
+    }
+
+    .email-preview-meta {
+      border-bottom: 1px solid #E2E8F0;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .email-preview-meta strong {
+      color: var(--secondary);
+    }
+
+    .email-preview-paper {
+      background: #FFFFFF;
+      border-radius: 10px;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+    }
+
+    .email-preview-header {
+      background: linear-gradient(135deg, #1B365D 0%, #0F172A 100%);
+      color: white;
+      padding: 18px 20px;
+      text-align: center;
+    }
+
+    .email-preview-header h4 {
+      font-size: 1.15rem;
+      margin-bottom: 4px;
+      color: #FF8C00;
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    .email-preview-header p {
+      font-size: 0.75rem;
+      opacity: 0.85;
+      margin: 0;
+    }
+
+    .email-preview-body {
+      padding: 20px;
+      color: #334155;
+      line-height: 1.6;
+      font-size: 0.88rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 150px;
+    }
+
+    .email-preview-footer {
+      background: #F8FAFC;
+      border-top: 1px solid #E2E8F0;
+      padding: 14px 20px;
+      font-size: 0.75rem;
+      color: #64748B;
+      text-align: center;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -668,6 +826,9 @@
         </li>
         <li class="sidebar-item" data-tab="birthdays">
           <a>🎂 Birthdays</a>
+        </li>
+        <li class="sidebar-item" data-tab="broadcasts">
+          <a>✉️ Parent Emails</a>
         </li>
       </ul>
     </nav>
@@ -876,6 +1037,183 @@
       </div>
     </div>
 
+    <!-- 6. PARENT EMAIL BROADCASTS SCREEN -->
+    <div id="broadcastsScreen" class="tab-screen">
+      <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
+        <div class="stat-card">
+          <div class="stat-icon blue">👨‍👩‍👧‍👦</div>
+          <div class="stat-details">
+            <h3 id="statTotalParents">0</h3>
+            <p>Unique Parent Emails</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">🤝</div>
+          <div class="stat-details">
+            <h3 id="statMentorshipParents">0</h3>
+            <p>Mentorship Parents</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✉️</div>
+          <div class="stat-details">
+            <h3 id="statAnnouncementsSent">0</h3>
+            <p>Broadcasts Sent</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Template Selector -->
+      <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px;">
+        <div>
+          <h3 style="font-size: 1.15rem; color: var(--secondary); margin-bottom: 4px;">Choose a Quick Template</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Select a pre-crafted template or customize your own message below.</p>
+        </div>
+        <button type="button" class="btn" onclick="clearBroadcastComposer()" style="width: auto; padding: 6px 12px; font-size: 0.8rem; background: #EEF2F6; color: var(--secondary);">✨ Clear Composer</button>
+      </div>
+
+      <div class="broadcast-templates-grid">
+        <div class="broadcast-template-card" onclick="selectBroadcastTemplate('reminder')">
+          <div class="icon">📅</div>
+          <div class="title">Saturday Class Reminder</div>
+          <div class="desc">Notify parents about tomorrow's class, Zoom meeting link, and Bible supplies.</div>
+        </div>
+        <div class="broadcast-template-card" onclick="selectBroadcastTemplate('appreciation')">
+          <div class="icon">❤️</div>
+          <div class="title">Parent Appreciation</div>
+          <div class="desc">Heartfelt thank you to parents for nurturing their child in God's Word.</div>
+        </div>
+        <div class="broadcast-template-card" onclick="selectBroadcastTemplate('update')">
+          <div class="icon">📢</div>
+          <div class="title">Club Update & News</div>
+          <div class="desc">General announcement for upcoming activities, monthly themes, or guest sessions.</div>
+        </div>
+        <div class="broadcast-template-card" onclick="selectBroadcastTemplate('assignment')">
+          <div class="icon">📝</div>
+          <div class="title">Verse & Homework Reminder</div>
+          <div class="desc">Mid-week encouragement to practice memory verses and finish weekly activities.</div>
+        </div>
+      </div>
+
+      <!-- Composer and Live Preview Grid -->
+      <div class="broadcast-composer-grid">
+        <!-- Composer Form -->
+        <div class="broadcast-box">
+          <h3 style="font-size: 1.2rem; color: var(--secondary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <span>✏️</span> Compose Broadcast
+          </h3>
+
+          <form id="broadcastForm" onsubmit="handleBroadcastSubmit(event)">
+            <!-- Target Audience Selector -->
+            <div class="form-group">
+              <label for="broadcastGroupSelect">Target Audience:</label>
+              <select id="broadcastGroupSelect" class="form-control" onchange="handleBroadcastGroupChange()">
+                <option value="all">👥 All Parents (All Registered Children)</option>
+                <option value="mentorship">🤝 Mentorship Parents Only</option>
+                <option value="single">👤 Single Parent / Specific Child</option>
+              </select>
+              <small id="broadcastAudienceSummary" style="display: block; margin-top: 5px; color: var(--text-muted); font-size: 0.8rem;">
+                Will send individual personalized emails to all active parents.
+              </small>
+            </div>
+
+            <!-- Single Child Selector (hidden by default) -->
+            <div id="singleChildGroup" class="form-group" style="display: none;">
+              <label for="broadcastChildSelect">Select Child / Parent:</label>
+              <select id="broadcastChildSelect" class="form-control" onchange="handleSingleChildChange()">
+                <!-- Populated dynamically via JS -->
+              </select>
+            </div>
+
+            <!-- Subject Line -->
+            <div class="form-group">
+              <label for="broadcastSubject">Email Subject Line:</label>
+              <input type="text" id="broadcastSubject" class="form-control" required placeholder="e.g. [The Light Bible Club] Saturday Class Reminder: See you tomorrow! ☀️" oninput="updateBroadcastPreview()">
+            </div>
+
+            <!-- Placeholders helpers -->
+            <div style="margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: var(--secondary); margin: 0;">Message Content:</label>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Insert placeholder:</span>
+                <button type="button" class="var-pill-btn" onclick="insertPlaceholder('{{parentName}}')" title="Click to insert {{parentName}}">+ {{parentName}}</button>
+                <button type="button" class="var-pill-btn" onclick="insertPlaceholder('{{childName}}')" title="Click to insert {{childName}}">+ {{childName}}</button>
+              </div>
+            </div>
+
+            <!-- Message Body -->
+            <div class="form-group" style="margin-bottom: 20px;">
+              <textarea id="broadcastBody" class="form-control" rows="10" required placeholder="Type your email message here. Use {{parentName}} and {{childName}} to personalize each email automatically!" style="line-height: 1.5; resize: vertical;" oninput="updateBroadcastPreview()"></textarea>
+            </div>
+
+            <!-- Send Action Button -->
+            <button type="submit" id="sendBroadcastBtn" class="btn btn-primary" style="gap: 10px; font-size: 1rem;">
+              <span>🚀</span> Send Broadcast Email
+            </button>
+          </form>
+        </div>
+
+        <!-- Live Preview Box -->
+        <div class="broadcast-box" style="display: flex; flex-direction: column;">
+          <h3 style="font-size: 1.2rem; color: var(--secondary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <span>👁️</span> Live Email Preview
+          </h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">
+            This is an authentic representation of how parents will receive this email in their inbox.
+          </p>
+
+          <div class="email-preview-envelope" style="flex: 1;">
+            <div class="email-preview-meta">
+              <div><strong>From:</strong> The Light Bible Club &lt;thelightonlinebibleclub@gmail.com&gt;</div>
+              <div><strong>To:</strong> <span id="previewToText">Mrs. Adewale (Parent)</span></div>
+              <div><strong>Subject:</strong> <span id="previewSubjectText" style="font-weight: 600; color: var(--secondary);">[No Subject Yet]</span></div>
+            </div>
+
+            <div class="email-preview-paper">
+              <div class="email-preview-header">
+                <h4>☀️ The Light Bible Club</h4>
+                <p>Nurturing young minds in God's Truth & Light</p>
+              </div>
+              <div id="previewBodyText" class="email-preview-body">
+                Dear Parent,
+                
+                Your email message will appear here in real time as you type or pick a template on the left!
+              </div>
+              <div class="email-preview-footer">
+                <strong>The Light Bible Club</strong><br>
+                Email: thelightonlinebibleclub@gmail.com | Virtual Club Meetings Every Saturday<br>
+                <em>"Train up a child in the way he should go..." — Proverbs 22:6</em>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Past Sent Broadcasts History -->
+      <div style="margin-top: 36px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="font-size: 1.25rem; color: var(--secondary);">📜 Sent Announcements & Email History</h3>
+          <span id="announcementsCountBadge" style="font-size: 0.8rem; background: rgba(27, 54, 93, 0.1); color: var(--secondary); padding: 4px 10px; border-radius: 12px; font-weight: 600;">0 sent</span>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Date / Time</th>
+                <th>Subject</th>
+                <th>Audience</th>
+                <th>Recipients</th>
+                <th>Message Snippet</th>
+              </tr>
+            </thead>
+            <tbody id="announcementsTableBody">
+              <!-- Populated via Javascript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- WhatsApp Custom Message Modal -->
@@ -1037,7 +1375,8 @@
       registrations: [],
       attendance: [],
       assignments: [],
-      birthdayEmails: []
+      birthdayEmails: [],
+      announcements: []
     };
     
     // Date Helpers
@@ -1194,10 +1533,11 @@
         store.attendance = data.attendance || [];
         store.assignments = data.assignments || [];
         store.birthdayEmails = data.birthdayEmails || [];
+        store.announcements = data.announcements || [];
         document.getElementById('loginScreen').style.display = 'none';
         loggedIn = true;
         
-        console.log(`[Dashboard] Loaded: ${store.registrations.length} kids, ${store.attendance.length} attendance records, ${store.assignments.length} assignments`);
+        console.log(`[Dashboard] Loaded: ${store.registrations.length} kids, ${store.attendance.length} attendance records, ${store.assignments.length} assignments, ${store.announcements.length} announcements`);
         if (store.registrations.length > 0) {
           console.log('[Dashboard] Sample record fields:', Object.keys(store.registrations[0]));
         }
@@ -1236,7 +1576,10 @@
         // Hide all screens
         document.querySelectorAll('.tab-screen').forEach(s => s.classList.remove('active'));
         // Show selected screen
-        document.getElementById(tab + 'Screen').classList.add('active');
+        const targetScreen = document.getElementById(tab + 'Screen');
+        if (targetScreen) {
+          targetScreen.classList.add('active');
+        }
         
         // Date Selector visibility
         const dateSelectorContainer = document.getElementById('dateSelectorContainer');
@@ -1252,11 +1595,14 @@
           attendance: ["Weekly Attendance Tracker", "Mark kids present or absent and notify parents"],
           assignments: ["Weekly Assignment Status", "Mark homework done or not done and follow up"],
           members: ["Registered Children", "Searchable listing of all club members"],
-          birthdays: ["Club Member Birthdays", "Manage birthday notifications and greetings"]
+          birthdays: ["Club Member Birthdays", "Manage birthday notifications and greetings"],
+          broadcasts: ["Parent Email Broadcasts", "Send weekly class reminders, parent appreciations, and club updates"]
         };
         
-        document.getElementById('screenTitle').textContent = titleMap[tab][0];
-        document.getElementById('screenSubtitle').textContent = titleMap[tab][1];
+        if (titleMap[tab]) {
+          document.getElementById('screenTitle').textContent = titleMap[tab][0];
+          document.getElementById('screenSubtitle').textContent = titleMap[tab][1];
+        }
       });
     });
 
@@ -1267,6 +1613,7 @@
       renderAssignments();
       renderMembersTable();
       renderBirthdays();
+      renderBroadcasts();
     }
 
     function updateAnalytics() {
@@ -1526,13 +1873,18 @@
             <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Grade: ${child.schoolGrade}</div>
           </td>
           <td>${dobStr} <span style="font-size:0.8rem; color:var(--text-muted);">(Age ${child.age})</span></td>
-          <td><strong>${child.parentName}</strong><br><span style="font-size:0.78rem; color:var(--text-muted);">${child.parentRelation || child.relationship}</span></td>
+          <td>
+            <strong>${child.parentName}</strong><br>
+            <span style="font-size:0.78rem; color:var(--text-muted);">${child.parentRelation || child.relationship}</span>
+            ${child.parentEmail ? `<br><span style="font-size:0.74rem; color:var(--secondary); word-break:break-all;">✉️ ${child.parentEmail}</span>` : ''}
+          </td>
           <td>
             <div style="font-size:0.82rem; margin-bottom:3px;">📞 ${child.parentMobileLine || child.parentMobile || 'N/A'}</div>
             <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:6px;">💬 ${child.parentWhatsAppLine || child.parentWhatsApp || 'N/A'}</div>
             <div style="display:flex; gap:5px; flex-wrap:wrap;">
               <button class="whatsapp-action-btn" onclick="quickSendCheckIn(${child.id})" title="One-click check-in to parent on WhatsApp" style="font-size:0.72rem; padding:4px 8px; background:rgba(46,204,113,0.12); color:#27AE60;">⚡ Check-in</button>
-              <button class="whatsapp-action-btn" onclick="sendWhatsAppReminder(${child.id}, 'checkup')" title="Compose custom WhatsApp message" style="font-size:0.72rem; padding:4px 8px; background:rgba(27,54,93,0.08); color:var(--secondary); border-color:rgba(27,54,93,0.3);">✉️ Custom</button>
+              <button class="whatsapp-action-btn" onclick="sendWhatsAppReminder(${child.id}, 'checkup')" title="Compose custom WhatsApp message" style="font-size:0.72rem; padding:4px 8px; background:rgba(27,54,93,0.08); color:var(--secondary); border-color:rgba(27,54,93,0.3);">💬 WhatsApp</button>
+              <button class="whatsapp-action-btn" onclick="openDirectEmail(${child.id})" title="Compose and send email to this parent" style="font-size:0.72rem; padding:4px 8px; background:rgba(255,140,0,0.12); color:var(--primary); border-color:rgba(255,140,0,0.3);">✉️ Email</button>
             </div>
           </td>
           <td>
@@ -1972,6 +2324,378 @@
         console.error('Delete error:', err);
         alert('Failed to delete registration: ' + err.message);
       } finally {
+        document.getElementById('loadingOverlay').style.display = 'none';
+      }
+    }
+
+    // ─── PARENT EMAIL BROADCASTS & REMINDERS ────────────────────────────────
+    const BROADCAST_TEMPLATES = {
+      reminder: {
+        subject: "[The Light Bible Club] Saturday Class Reminder — See you tomorrow! ☀️",
+        body: `Dear {{parentName}},
+
+This is a gentle reminder that The Light Bible Club meets tomorrow, Saturday!
+
+We are super excited to welcome {{childName}} to another fun, inspiring, and spiritually enriching session.
+
+Please ensure {{childName}} has their Bible, notebook, and pencil ready. Let's learn and grow in God's Word together!
+
+📅 Day: Saturday
+⏰ Time: 4:00 PM (WAT / GMT+1)
+💻 Link: Virtual Classroom (check your calendar invite or WhatsApp group for the Zoom link)
+
+We look forward to an amazing time in God's presence!
+
+With warm love and blessings,
+The Light Bible Club Team`
+      },
+      appreciation: {
+        subject: "[The Light Bible Club] Heartfelt Appreciation to Our Amazing Parents! 🌟",
+        body: `Dear {{parentName}},
+
+We want to take a special moment to celebrate and appreciate you!
+
+Thank you for your love, dedication, and steadfast commitment to nurturing {{childName}} in the ways and knowledge of the Lord.
+
+Proverbs 22:6 reminds us:
+"Train up a child in the way he should go: and when he is old, he will not depart from it."
+
+Your investment into {{childName}}'s spiritual foundation is yielding eternal fruits. It is an honor and joy to partner with your family at The Light Bible Club.
+
+May the Lord continually bless your home, strengthen your hands, and grant you wisdom in raising champions for His Kingdom!
+
+With our deepest love and gratitude,
+The Light Bible Club Team`
+      },
+      update: {
+        subject: "[The Light Bible Club] Important Club Updates & Announcements 📢",
+        body: `Dear {{parentName}},
+
+We hope you and {{childName}} are having a wonderful, blessed week!
+
+Here are a few quick updates and announcements for The Light Bible Club:
+
+1. Monthly Theme: Walking as Children of Light (1 John 1:7).
+2. Weekly Class: Every Saturday at 4:00 PM WAT.
+3. Interactive Workshops: Keep an eye out for special guest sessions coming up this month!
+
+If you have any questions, suggestions, or personal prayer requests for {{childName}}, please feel free to reply directly to this email or chat with us on WhatsApp.
+
+Thank you for being a vital part of our club family!
+
+Warmest regards,
+The Light Bible Club Team`
+      },
+      assignment: {
+        subject: "[The Light Bible Club] Weekly Memory Verse & Activity Reminder for {{childName}} 🎯",
+        body: `Dear {{parentName}},
+
+This is a friendly mid-week encouragement for {{childName}}!
+
+Please encourage {{childName}} to practice their weekly memory verse and complete their club activity worksheet before our upcoming Saturday session.
+
+"Thy word have I hid in mine heart, that I might not sin against thee." — Psalm 119:11
+
+Reviewing the lesson at home helps root the truth deeply in their hearts. Thank you for cheering {{childName}} on every step of the way!
+
+Blessings and peace to your family,
+The Light Bible Club Team`
+      }
+    };
+
+    function selectBroadcastTemplate(key) {
+      document.querySelectorAll('.broadcast-template-card').forEach(card => card.classList.remove('active'));
+      const activeCard = Array.from(document.querySelectorAll('.broadcast-template-card')).find(c => c.getAttribute('onclick')?.includes(`'${key}'`));
+      if (activeCard) activeCard.classList.add('active');
+
+      const template = BROADCAST_TEMPLATES[key];
+      if (!template) return;
+
+      document.getElementById('broadcastSubject').value = template.subject;
+      document.getElementById('broadcastBody').value = template.body;
+      updateBroadcastPreview();
+    }
+
+    function clearBroadcastComposer() {
+      document.querySelectorAll('.broadcast-template-card').forEach(card => card.classList.remove('active'));
+      document.getElementById('broadcastSubject').value = '';
+      document.getElementById('broadcastBody').value = '';
+      document.getElementById('broadcastGroupSelect').value = 'all';
+      handleBroadcastGroupChange();
+      updateBroadcastPreview();
+    }
+
+    function insertPlaceholder(placeholder) {
+      const textarea = document.getElementById('broadcastBody');
+      const startPos = textarea.selectionStart || 0;
+      const endPos = textarea.selectionEnd || 0;
+      const originalText = textarea.value;
+
+      textarea.value = originalText.substring(0, startPos) + placeholder + originalText.substring(endPos);
+      textarea.focus();
+      textarea.selectionStart = startPos + placeholder.length;
+      textarea.selectionEnd = startPos + placeholder.length;
+      updateBroadcastPreview();
+    }
+
+    function handleBroadcastGroupChange() {
+      const group = document.getElementById('broadcastGroupSelect').value;
+      const singleGroup = document.getElementById('singleChildGroup');
+      const summary = document.getElementById('broadcastAudienceSummary');
+
+      if (group === 'single') {
+        singleGroup.style.display = 'block';
+        populateSingleChildSelect();
+        handleSingleChildChange();
+      } else {
+        singleGroup.style.display = 'none';
+        if (group === 'mentorship') {
+          const count = store.registrations.filter(r => (r.personalPaidMentorship || '').toLowerCase().startsWith('y')).length;
+          summary.textContent = `Will send individual personalized emails to all parents in the Mentorship program (~${count} children).`;
+        } else {
+          const uniqueParents = new Set(store.registrations.map(r => (r.parentEmail || '').toLowerCase().trim()).filter(Boolean));
+          summary.textContent = `Will send individual personalized emails to all active club parents (~${uniqueParents.size} unique parents for ${store.registrations.length} children).`;
+        }
+      }
+      updateBroadcastPreview();
+    }
+
+    function populateSingleChildSelect(selectedId = null) {
+      const select = document.getElementById('broadcastChildSelect');
+      if (!select) return;
+      select.innerHTML = '';
+
+      const sortedKids = [...store.registrations].sort((a, b) => 
+        (a.childFirstName || '').localeCompare(b.childFirstName || '')
+      );
+
+      sortedKids.forEach(kid => {
+        const option = document.createElement('option');
+        option.value = kid.id;
+        option.textContent = `${kid.childFirstName} ${kid.childLastName} — Parent: ${kid.parentName || 'Guardian'} (${kid.parentEmail || 'No email'})`;
+        if (selectedId && Number(kid.id) === Number(selectedId)) {
+          option.selected = true;
+        }
+        select.appendChild(option);
+      });
+    }
+
+    function handleSingleChildChange() {
+      const childSelect = document.getElementById('broadcastChildSelect');
+      if (!childSelect) return;
+      const childId = childSelect.value;
+      const child = store.registrations.find(r => Number(r.id) === Number(childId));
+      const summary = document.getElementById('broadcastAudienceSummary');
+      if (child) {
+        summary.textContent = `Will send directly to ${child.parentName || 'Parent'} (${child.parentEmail || 'No email on file'}).`;
+      }
+      updateBroadcastPreview();
+    }
+
+    function updateBroadcastPreview() {
+      const groupEl = document.getElementById('broadcastGroupSelect');
+      if (!groupEl) return;
+      const group = groupEl.value;
+
+      let sampleParent = 'Mrs. Adewale';
+      let sampleChild = 'David';
+      let sampleEmail = 'parent@example.com';
+
+      if (group === 'single') {
+        const childSelect = document.getElementById('broadcastChildSelect');
+        const childId = childSelect ? childSelect.value : null;
+        const child = store.registrations.find(r => Number(r.id) === Number(childId));
+        if (child) {
+          sampleParent = child.parentName || 'Parent';
+          sampleChild = child.childFirstName || 'Child';
+          sampleEmail = child.parentEmail || 'No email';
+        }
+      } else if (store.registrations.length > 0) {
+        const first = store.registrations[0];
+        sampleParent = first.parentName || 'Parent';
+        sampleChild = first.childFirstName || 'Child';
+        sampleEmail = first.parentEmail || 'parent@example.com';
+      }
+
+      // Preview To header
+      const previewTo = document.getElementById('previewToText');
+      if (previewTo) {
+        if (group === 'single') {
+          previewTo.textContent = `${sampleParent} <${sampleEmail}>`;
+        } else if (group === 'mentorship') {
+          const count = store.registrations.filter(r => (r.personalPaidMentorship || '').toLowerCase().startsWith('y')).length;
+          previewTo.textContent = `Mentorship Parents (~${count} recipients, previewing for ${sampleParent})`;
+        } else {
+          const uniqueParents = new Set(store.registrations.map(r => (r.parentEmail || '').toLowerCase().trim()).filter(Boolean));
+          previewTo.textContent = `All Parents (~${uniqueParents.size} recipients, previewing for ${sampleParent})`;
+        }
+      }
+
+      // Subject
+      const rawSubject = (document.getElementById('broadcastSubject')?.value || '').trim();
+      const subjectPreview = rawSubject
+        ? rawSubject.replace(/\{\{parentName\}\}/gi, sampleParent).replace(/\{\{childName\}\}/gi, sampleChild)
+        : '[No Subject Entered]';
+      const previewSub = document.getElementById('previewSubjectText');
+      if (previewSub) previewSub.textContent = subjectPreview;
+
+      // Body
+      const rawBody = document.getElementById('broadcastBody')?.value || '';
+      const bodyPreview = rawBody
+        ? rawBody.replace(/\{\{parentName\}\}/gi, sampleParent).replace(/\{\{childName\}\}/gi, sampleChild)
+        : 'Your email message will appear here in real time as you type or pick a template above!';
+      const previewBody = document.getElementById('previewBodyText');
+      if (previewBody) previewBody.textContent = bodyPreview;
+    }
+
+    function openDirectEmail(childId) {
+      const broadcastsTabBtn = Array.from(document.querySelectorAll('.sidebar-item')).find(item => item.dataset.tab === 'broadcasts');
+      if (broadcastsTabBtn) {
+        broadcastsTabBtn.click();
+      }
+
+      const groupEl = document.getElementById('broadcastGroupSelect');
+      if (groupEl) groupEl.value = 'single';
+      const singleGroup = document.getElementById('singleChildGroup');
+      if (singleGroup) singleGroup.style.display = 'block';
+
+      populateSingleChildSelect(childId);
+      handleSingleChildChange();
+
+      const child = store.registrations.find(r => Number(r.id) === Number(childId));
+      if (child) {
+        document.getElementById('broadcastSubject').value = `[The Light Bible Club] Check-in regarding ${child.childFirstName} ☀️`;
+        document.getElementById('broadcastBody').value = `Dear {{parentName}},
+
+We hope you and {{childName}} are having a wonderful and blessed week!
+
+We are just checking in on {{childName}} to see how they are doing and if there is any way we can support their journey or pray with your family this week.
+
+We look forward to having {{childName}} in our upcoming Saturday session!
+
+Warm regards and God's blessings,
+The Light Bible Club Team`;
+      }
+
+      updateBroadcastPreview();
+
+      const composer = document.getElementById('broadcastForm');
+      if (composer) {
+        composer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function renderBroadcasts() {
+      // 1. Stats
+      const uniqueParents = new Set(store.registrations.map(r => (r.parentEmail || '').toLowerCase().trim()).filter(Boolean));
+      const statTotalParents = document.getElementById('statTotalParents');
+      if (statTotalParents) statTotalParents.textContent = uniqueParents.size;
+
+      const mentorshipKids = store.registrations.filter(r => (r.personalPaidMentorship || '').toLowerCase().startsWith('y'));
+      const uniqueMentorshipParents = new Set(mentorshipKids.map(r => (r.parentEmail || '').toLowerCase().trim()).filter(Boolean));
+      const statMentorshipParents = document.getElementById('statMentorshipParents');
+      if (statMentorshipParents) statMentorshipParents.textContent = uniqueMentorshipParents.size;
+
+      const announcements = store.announcements || [];
+      const statAnnouncementsSent = document.getElementById('statAnnouncementsSent');
+      if (statAnnouncementsSent) statAnnouncementsSent.textContent = announcements.length;
+      const announcementsBadge = document.getElementById('announcementsCountBadge');
+      if (announcementsBadge) announcementsBadge.textContent = `${announcements.length} sent`;
+
+      // 2. Announcements table
+      const tbody = document.getElementById('announcementsTableBody');
+      if (tbody) {
+        tbody.innerHTML = '';
+
+        if (announcements.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding: 24px;">No email broadcasts sent yet. Use the composer above to send your first reminder or update!</td></tr>`;
+        } else {
+          announcements.forEach(item => {
+            const tr = document.createElement('tr');
+            const rawDate = item.sentAt || item.sent_at;
+            const dateStr = rawDate ? new Date(rawDate).toLocaleString(undefined, {
+              month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            }) : 'Recently';
+
+            const groupVal = item.recipientGroup || item.recipient_group || 'all';
+            let audienceLabel = 'All Parents';
+            let badgeColor = 'rgba(27, 54, 93, 0.1); color: var(--secondary);';
+            if (groupVal === 'mentorship') {
+              audienceLabel = 'Mentorship';
+              badgeColor = 'rgba(255, 140, 0, 0.15); color: var(--primary);';
+            } else if (groupVal === 'single' || groupVal.startsWith('Individual')) {
+              audienceLabel = groupVal.startsWith('Individual') ? groupVal : 'Single Parent';
+              badgeColor = 'rgba(46, 204, 113, 0.15); color: #27AE60;';
+            }
+
+            const snippet = (item.message || '').replace(/\n/g, ' ').slice(0, 75) + ((item.message || '').length > 75 ? '...' : '');
+            const count = item.recipientCount !== undefined ? item.recipientCount : (item.recipient_count !== undefined ? item.recipient_count : 1);
+
+            tr.innerHTML = `
+              <td><strong style="color:var(--secondary); font-size:0.85rem;">${dateStr}</strong></td>
+              <td><strong>${item.subject || '[No Subject]'}</strong></td>
+              <td><span style="padding: 4px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; background: ${badgeColor}">${audienceLabel}</span></td>
+              <td><strong style="color:var(--secondary);">${count}</strong> parents</td>
+              <td style="font-size:0.82rem; color:var(--text-muted);">${snippet}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      }
+
+      populateSingleChildSelect();
+      updateBroadcastPreview();
+    }
+
+    async function handleBroadcastSubmit(e) {
+      e.preventDefault();
+      const group = document.getElementById('broadcastGroupSelect').value;
+      const childId = group === 'single' ? document.getElementById('broadcastChildSelect').value : null;
+      const subject = document.getElementById('broadcastSubject').value.trim();
+      const message = document.getElementById('broadcastBody').value.trim();
+      const sendBtn = document.getElementById('sendBroadcastBtn');
+
+      if (!subject) {
+        alert('Please enter an email subject line.');
+        return;
+      }
+      if (!message) {
+        alert('Please enter your message body.');
+        return;
+      }
+
+      let audienceDesc = 'all parents';
+      if (group === 'mentorship') audienceDesc = 'all mentorship parents';
+      if (group === 'single') {
+        const child = store.registrations.find(r => Number(r.id) === Number(childId));
+        audienceDesc = child ? `${child.parentName || 'Parent'} (${child.parentEmail})` : 'the selected parent';
+      }
+
+      const confirmMsg = `Are you sure you want to send this email to ${audienceDesc}?\n\nSubject: "${subject}"\n\nEach recipient will receive a personalized email with their child's name.`;
+      if (!confirm(confirmMsg)) return;
+
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = `<span>⏳</span> Sending emails to parents... Please wait`;
+      document.getElementById('loadingOverlay').style.display = 'flex';
+
+      try {
+        const result = await callAdminApi({
+          action: 'sendBroadcastEmail',
+          recipientGroup: group,
+          childId: childId ? Number(childId) : undefined,
+          subject: subject,
+          message: message
+        });
+
+        await loadDashboardData();
+
+        alert(`✅ Success!\n\n${result.message || 'Broadcast sent successfully.'}\nTotal emails dispatched: ${result.sentCount || 1}`);
+      } catch (err) {
+        console.error('Broadcast error:', err);
+        alert(`❌ Could not complete email broadcast:\n\n${err.message}`);
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = `<span>🚀</span> Send Broadcast Email`;
         document.getElementById('loadingOverlay').style.display = 'none';
       }
     }

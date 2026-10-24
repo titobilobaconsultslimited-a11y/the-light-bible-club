@@ -71,3 +71,12 @@ CREATE TABLE IF NOT EXISTS site_sessions (
 );
 
 CREATE INDEX IF NOT EXISTS IDX_site_sessions_expire ON site_sessions (expire);
+
+CREATE TABLE IF NOT EXISTS parent_announcements (
+  id SERIAL PRIMARY KEY,
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL,
+  recipient_group TEXT NOT NULL,
+  recipient_count INTEGER NOT NULL DEFAULT 0,
+  sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
